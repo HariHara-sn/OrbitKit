@@ -14,6 +14,7 @@ export const ToggleButton = ({ isOn, onPress }: ToggleButtonProps) => (
         styles.button,
         isOn && styles.buttonOn,
         pressed && styles.buttonPressed,
+        
       ]}
       accessibilityRole="button"
       accessibilityLabel={isOn ? 'Turn flashlight off' : 'Turn flashlight on'}
