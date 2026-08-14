@@ -73,3 +73,68 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# IDE and Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Generated files
+/android/app/src/main/java/com/facebook/react/BuildConfig.java
+/android/app/src/main/java/com/facebook/react/modules/
+
+# Build artifacts
+/build
+/dist
+*.apk
+*.aab
+
+# Metro bundler
+.metro-bundler-cache/
+.metro-cache/
+
+# Gradle
+gradle-wrapper.jar
+.gradle/
+
+# Cache files
+.cache/
+.npm/
+.eslintcache
+.stylelintcache
+
+# Lock files (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+dist/
+
+# Misc
+*.log
+.viminfo
+.history
