@@ -1,5 +1,8 @@
-import { useCallback, useState } from 'react';
-import { MAX_BRIGHTNESS } from '../constants';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  MAX_BRIGHTNESS,
+  STROBE_DEFAULT_INTERVAL,
+} from '../constants';
 import type { FlashlightMode } from '../constants';
 import { FlashlightModule } from '../native/FlashlightModule';
 import { requestCameraPermission } from '../utils/permissions';
@@ -7,6 +10,7 @@ import { requestCameraPermission } from '../utils/permissions';
 export const useTorch = () => {
   const [isOn, setIsOn] = useState(false);
   const [mode, setModeState] = useState<FlashlightMode>('torch');
+  const [strobeSpeed, setStrobeSpeed] = useState(STROBE_DEFAULT_INTERVAL);
 
   const turnOff = useCallback(() => {
     FlashlightModule.setTorchMode(false);
@@ -15,20 +19,45 @@ export const useTorch = () => {
   }, []);
 
   const turnOn = useCallback(async () => {
-    if (mode === 'torch') {
+    if (mode === 'torch' || mode === 'strobe') {
       const granted = await requestCameraPermission();
       if (!granted) {
         return;
       }
-      const success = await FlashlightModule.setTorchMode(true);
-      if (!success) {
-        return;
+      if (mode === 'torch') {
+        const success = await FlashlightModule.setTorchMode(true);
+        if (!success) {
+          return;
+        }
       }
-    } else {
+    } else if (mode === 'white') {
       FlashlightModule.setBrightness(MAX_BRIGHTNESS);
+    } else {
+      return;
     }
     setIsOn(true);
   }, [mode]);
+
+  // Drives the strobe blinking: a timer that toggles the torch on/off at the
+  // configured interval. Restarts whenever the mode, on-state or speed change.
+  useEffect(() => {
+    if (!isOn || mode !== 'strobe') {
+      return;
+    }
+
+    let torchOn = false;
+    const flash = () => {
+      torchOn = !torchOn;
+      FlashlightModule.setTorchMode(torchOn);
+    };
+    flash();
+    const timer = setInterval(flash, strobeSpeed);
+
+    return () => {
+      clearInterval(timer);
+      FlashlightModule.setTorchMode(false);
+    };
+  }, [isOn, mode, strobeSpeed]);
 
   const toggle = useCallback(async () => {
     if (isOn) {
@@ -53,6 +82,8 @@ export const useTorch = () => {
     isOn,
     mode,
     isWhiteScreenVisible: isOn && mode === 'white',
+    strobeSpeed,
+    setStrobeSpeed,
     toggle,
     turnOff,
     setMode,

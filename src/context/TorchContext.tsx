@@ -7,6 +7,8 @@ interface TorchContextValue {
   isOn: boolean;
   mode: FlashlightMode;
   isWhiteScreenVisible: boolean;
+  strobeSpeed: number;
+  setStrobeSpeed: (speed: number) => void;
   toggle: () => Promise<void>;
   turnOff: () => void;
   setMode: (mode: FlashlightMode) => void;
@@ -22,6 +24,8 @@ export const TorchProvider = ({ children }: { children: ReactNode }) => {
       isOn: torch.isOn,
       mode: torch.mode,
       isWhiteScreenVisible: torch.isWhiteScreenVisible,
+      strobeSpeed: torch.strobeSpeed,
+      setStrobeSpeed: torch.setStrobeSpeed,
       toggle: torch.toggle,
       turnOff: torch.turnOff,
       setMode: torch.setMode,
@@ -30,6 +34,8 @@ export const TorchProvider = ({ children }: { children: ReactNode }) => {
       torch.isOn,
       torch.mode,
       torch.isWhiteScreenVisible,
+      torch.strobeSpeed,
+      torch.setStrobeSpeed,
       torch.toggle,
       torch.turnOff,
       torch.setMode,
