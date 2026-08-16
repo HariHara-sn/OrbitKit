@@ -9,7 +9,7 @@ interface BottomNavProps {
   onModeChange: (mode: FlashlightMode) => void;
 }
 
-const TABS: FlashlightMode[] = ['torch', 'white', 'strobe', 'dj'];
+const TABS: FlashlightMode[] = ['torch', 'white', 'strobe', 'morse'];
 
 export const BottomNav = ({ mode, onModeChange }: BottomNavProps) => {
   const insets = useSafeAreaInsets();

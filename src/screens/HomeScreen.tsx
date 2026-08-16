@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/BottomNav';
 import { ToggleButton } from '../components/ToggleButton';
 import { useTorchContext } from '../context/TorchContext';
-import { DummyScreen } from './DummyScreen';
+import { MorseScreen } from './MorseScreen';
 import { StrobeScreen } from './StrobeScreen';
 
 export const HomeScreen = () => {
@@ -32,7 +32,7 @@ export const HomeScreen = () => {
           </>
         )}
 
-        {mode === 'dj' && <DummyScreen title="DJ" />}
+        {mode === 'morse' && <MorseScreen />}
         {mode === 'strobe' && <StrobeScreen />}
       </View>
       <BottomNav mode={mode} onModeChange={setMode} />
