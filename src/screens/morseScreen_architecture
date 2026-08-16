@@ -1,0 +1,700 @@
+
+## 1. Core functionality
+
+Your flow is:
+
+```text
+User enters text
+      ↓
+"SOS"
+      ↓
+Morse Encoder
+      ↓
+"... --- ..."
+      ↓
+Timing Engine
+      ↓
+Flashlight ON/OFF
+      ↓
+📱 Camera Flash
+```
+
+For example:
+
+**SOS**
+
+```text
+S = ...
+O = ---
+S = ...
+```
+
+So the transmitted sequence becomes:
+
+```text
+... --- ...
+```
+
+---
+
+## 2. Morse timing
+
+Use the standard Morse timing:
+
+| Signal                 | Duration |
+| ---------------------- | -------: |
+| Dot `.`                |   1 unit |
+| Dash `-`               |  3 units |
+| Gap inside a character |   1 unit |
+| Gap between characters |  3 units |
+| Gap between words      |  7 units |
+
+If:
+
+```text
+unit = 200 ms
+```
+
+then:
+
+```text
+DOT      = 200 ms ON
+          200 ms OFF
+
+DASH     = 600 ms ON
+          200 ms OFF
+
+CHAR GAP = additional 400 ms
+WORD GAP = additional 1200 ms
+```
+
+I'd make the **speed configurable** later.
+
+---
+
+# 3. Recommended architecture
+
+Don't put everything inside your Compose screen.
+
+Use something like:
+
+```text
+app/
+├── data/
+│   └── MorseDictionary.kt
+│
+├── domain/
+│   └── MorseEncoder.kt
+│
+├── hardware/
+│   └── FlashlightController.kt
+│
+├── transmitter/
+│   └── MorseTransmitter.kt
+│
+├── ui/
+│   ├── MorseScreen.kt
+│   └── MorseViewModel.kt
+│
+└── MainActivity.kt
+```
+
+The important separation is:
+
+```text
+Compose UI
+    ↓
+ViewModel
+    ↓
+MorseTransmitter
+    ↓
+FlashlightController
+    ↓
+Android CameraManager
+```
+
+This is much better than putting flashlight logic directly in a `Button.onClick`.
+
+---
+
+# 4. Morse dictionary
+
+Start with letters and numbers.
+
+```kotlin
+object MorseDictionary {
+
+    val codes = mapOf(
+        'A' to ".-",
+        'B' to "-...",
+        'C' to "-.-.",
+        'D' to "-..",
+        'E' to ".",
+        'F' to "..-.",
+        'G' to "--.",
+        'H' to "....",
+        'I' to "..",
+        'J' to ".---",
+        'K' to "-.-",
+        'L' to ".-..",
+        'M' to "--",
+        'N' to "-.",
+        'O' to "---",
+        'P' to ".--.",
+        'Q' to "--.-",
+        'R' to ".-.",
+        'S' to "...",
+        'T' to "-",
+        'U' to "..-",
+        'V' to "...-",
+        'W' to ".--",
+        'X' to "-..-",
+        'Y' to "-.--",
+        'Z' to "--..",
+
+        '0' to "-----",
+        '1' to ".----",
+        '2' to "..---",
+        '3' to "...--",
+        '4' to "....-",
+        '5' to ".....",
+        '6' to "-....",
+        '7' to "--...",
+        '8' to "---..",
+        '9' to "----."
+    )
+}
+```
+
+Then:
+
+```text
+SOS
+```
+
+becomes:
+
+```text
+... --- ...
+```
+
+---
+
+# 5. Morse encoder
+
+Create a separate encoder:
+
+```kotlin
+class MorseEncoder {
+
+    fun encode(text: String): String {
+        return text
+            .uppercase()
+            .trim()
+            .split(Regex("\\s+"))
+            .joinToString(" / ") { word ->
+                word.mapNotNull { MorseDictionary.codes[it] }
+                    .joinToString(" ")
+            }
+    }
+}
+```
+
+Example:
+
+```kotlin
+MorseEncoder().encode("SOS")
+```
+
+returns:
+
+```text
+... --- ...
+```
+
+And:
+
+```kotlin
+MorseEncoder().encode("HELLO WORLD")
+```
+
+returns:
+
+```text
+.... . .-.. .-.. --- / .-- --- .-. .-.. -..
+```
+
+The `/` represents a word boundary.
+
+---
+
+# 6. Flashlight controller
+
+This is where Kotlin becomes particularly useful.
+
+Use Android's:
+
+```kotlin
+CameraManager
+```
+
+and:
+
+```kotlin
+setTorchMode()
+```
+
+Example:
+
+```kotlin
+class FlashlightController(
+    context: Context
+) {
+
+    private val cameraManager =
+        context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+    private val cameraId: String? =
+        cameraManager.cameraIdList.firstOrNull { id ->
+            cameraManager.getCameraCharacteristics(id)
+                .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+        }
+
+    fun turnOn() {
+        cameraId?.let {
+            cameraManager.setTorchMode(it, true)
+        }
+    }
+
+    fun turnOff() {
+        cameraId?.let {
+            cameraManager.setTorchMode(it, false)
+        }
+    }
+}
+```
+
+You'll also want to handle devices that don't have a camera flash.
+
+---
+
+# 7. Morse transmitter
+
+This is the interesting part.
+
+```kotlin
+class MorseTransmitter(
+    private val flashlight: FlashlightController
+) {
+
+    suspend fun transmit(
+        morse: String,
+        unit: Long = 200L
+    ) {
+
+        for (symbol in morse) {
+
+            when (symbol) {
+
+                '.' -> {
+                    flashlight.turnOn()
+                    delay(unit)
+
+                    flashlight.turnOff()
+                    delay(unit)
+                }
+
+                '-' -> {
+                    flashlight.turnOn()
+                    delay(unit * 3)
+
+                    flashlight.turnOff()
+                    delay(unit)
+                }
+
+                ' ' -> {
+                    delay(unit * 2)
+                }
+
+                '/' -> {
+                    delay(unit * 6)
+                }
+            }
+        }
+
+        flashlight.turnOff()
+    }
+}
+```
+
+The reason for the `2` and `6` here is that the previous symbol already contributed one unit of OFF time.
+
+For example:
+
+```text
+DOT
+ON  200
+OFF 200
+```
+
+Then the character gap needs a total of:
+
+```text
+300 ms? 
+```
+
+No — this is an important implementation detail.
+
+The cleanest approach is to **separate signal timing from gap timing** instead of trying to compensate implicitly.
+
+I'd actually implement the transmitter using tokens rather than treating spaces as ordinary symbols.
+
+---
+
+# 8. Better transmitter design
+
+Represent the encoded message as:
+
+```text
+[
+    DOT,
+    DOT,
+    DOT,
+    CHARACTER_GAP,
+    DASH,
+    DASH,
+    DASH,
+    CHARACTER_GAP,
+    DOT,
+    DOT,
+    DOT
+]
+```
+
+Then your transmitter becomes deterministic:
+
+```kotlin
+enum class MorseSignal {
+    DOT,
+    DASH,
+    CHARACTER_GAP,
+    WORD_GAP
+}
+```
+
+And:
+
+```kotlin
+suspend fun transmit(
+    signals: List<MorseSignal>,
+    unit: Long
+) {
+    for (signal in signals) {
+
+        when (signal) {
+
+            MorseSignal.DOT -> {
+                flashlight.turnOn()
+                delay(unit)
+                flashlight.turnOff()
+                delay(unit)
+            }
+
+            MorseSignal.DASH -> {
+                flashlight.turnOn()
+                delay(unit * 3)
+                flashlight.turnOff()
+                delay(unit)
+            }
+
+            MorseSignal.CHARACTER_GAP -> {
+                delay(unit * 2)
+            }
+
+            MorseSignal.WORD_GAP -> {
+                delay(unit * 6)
+            }
+        }
+    }
+
+    flashlight.turnOff()
+}
+```
+
+Because the DOT/DASH already includes **1 unit of OFF time**, the additional gap becomes:
+
+```text
+Character gap:
+3 total units
+- 1 already provided
+= 2 additional units
+```
+
+Likewise:
+
+```text
+Word gap:
+7 total units
+- 1 already provided
+= 6 additional units
+```
+
+That's the timing model I'd use.
+
+---
+
+# 9. Compose UI
+
+Your first screen can be very simple:
+
+```text
+┌───────────────────────────┐
+│       Morse Flash         │
+│                           │
+│   Enter your message      │
+│                           │
+│  ┌─────────────────────┐  │
+│  │ SOS                 │  │
+│  └─────────────────────┘  │
+│                           │
+│  Morse                    │
+│  ... --- ...              │
+│                           │
+│       Speed               │
+│       ───●────            │
+│                           │
+│    [ TRANSMIT ]           │
+│                           │
+│    [ STOP ]               │
+└───────────────────────────┘
+```
+
+As the user types:
+
+```text
+HELLO
+```
+
+you immediately show:
+
+```text
+.... . .-.. .-.. ---
+```
+
+Then pressing **Transmit** starts the flashlight.
+
+---
+
+# 10. Very important: Stop button
+
+Don't overlook this.
+
+Your transmitter should be cancellable.
+
+Use:
+
+```kotlin
+private var transmissionJob: Job? = null
+```
+
+Start:
+
+```kotlin
+transmissionJob = viewModelScope.launch {
+    transmitter.transmit(...)
+}
+```
+
+Stop:
+
+```kotlin
+transmissionJob?.cancel()
+flashlight.turnOff()
+```
+
+And make sure cancellation always turns the flashlight OFF.
+
+This prevents the worst possible bug:
+
+> User presses Stop but the flashlight remains ON.
+
+---
+
+# 11. Permissions
+
+For camera torch access, add the camera permission to `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.CAMERA" />
+```
+
+Then request the runtime camera permission before using the torch.
+
+You should also check:
+
+```kotlin
+packageManager.hasSystemFeature(
+    PackageManager.FEATURE_CAMERA_FLASH
+)
+```
+
+If there is no flash:
+
+```text
+⚠️ Flashlight unavailable
+
+This device doesn't have a camera flash.
+```
+
+---
+
+# 12. Features I'd add after MVP
+
+Once `SOS → ... --- ... → flashlight` works, I'd build the app in this order:
+
+### V1
+
+* Text input
+* Morse conversion
+* Flash transmission
+* Start
+* Stop
+* Speed control
+
+### V2
+
+* Live Morse highlighting
+
+For example:
+
+```text
+... --- ...
+ ^
+```
+
+Then:
+
+```text
+... --- ...
+    ^
+```
+
+The currently transmitted symbol gets highlighted.
+
+### V3
+
+* Repeat transmission
+
+```text
+[ Repeat × 3 ]
+```
+
+or:
+
+```text
+[ ∞ Repeat ]
+```
+
+### V4
+
+* Vibration synchronization
+* Sound synchronization
+* Screen flash mode
+
+### V5
+
+* Presets
+
+```text
+SOS
+HELP
+OK
+YES
+NO
+CUSTOM
+```
+
+### V6
+
+* Morse training mode
+
+User sees:
+
+```text
+... ---
+```
+
+and has to guess:
+
+```text
+SOS
+```
+
+That turns your simple flashlight app into a **Morse learning + communication utility**.
+
+---
+
+## One architectural decision I'd make now
+
+Don't name your core class something like:
+
+```text
+SOSFlashService
+```
+
+Make it generic:
+
+```text
+MorseTransmitter
+```
+
+Then:
+
+```text
+"SOS"
+```
+
+is just one input.
+
+Later:
+
+```text
+"HELP"
+"HELLO"
+"I NEED HELP"
+"12345"
+```
+
+can all use exactly the same engine.
+
+So your fundamental architecture becomes:
+
+```text
+                 ┌──────────────┐
+                 │  Compose UI  │
+                 └──────┬───────┘
+                        ↓
+                 ┌──────────────┐
+                 │   ViewModel  │
+                 └──────┬───────┘
+                        ↓
+                 ┌──────────────┐
+                 │ MorseEncoder │
+                 └──────┬───────┘
+                        ↓
+                 ┌────────────────┐
+                 │ MorseTransmitter│
+                 └───────┬────────┘
+                         ↓
+                 ┌──────────────────┐
+                 │ Flashlight       │
+                 │ Controller       │
+                 └────────┬─────────┘
+                          ↓
+                    Android Camera
+                       Torch API
+```
+
+**That is the architecture I recommend you build.**
+
+If you're starting from an empty Android Studio project, the next logical step is to set up the **Kotlin + Jetpack Compose project and implement the flashlight controller first**, then we can build the Morse encoder and transmitter on top of it.

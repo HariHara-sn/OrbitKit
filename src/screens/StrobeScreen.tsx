@@ -15,8 +15,8 @@ export const StrobeScreen = () => {
   return (
     <View style={styles.container}>
       <MaterialCommunityIcons
-        name="lightning-bolt"
-        size={72}
+        name="lightning-bolt"    
+        size={100}
         color="#FDE047"
       />
 
@@ -47,6 +47,7 @@ export const StrobeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 48,
