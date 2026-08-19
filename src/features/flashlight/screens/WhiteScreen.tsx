@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { colors } from '@/core/theme';
 import { useTorchContext } from '../../../app/providers/AppProviders';
 
 export const WhiteScreen = () => {
@@ -15,7 +16,7 @@ export const WhiteScreen = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'flex-end',
     paddingBottom: 48,
@@ -23,8 +24,8 @@ const styles = StyleSheet.create({
 
   hint: {
     fontSize: 14,
-    color: '#D1D5DB',
-    backgroundColor: 'rgba(17, 24, 39, 0.35)',
+    color: colors.hint,
+    backgroundColor: colors.overlay,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,

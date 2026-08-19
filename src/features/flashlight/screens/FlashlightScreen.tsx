@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/BottomNav';
 import { TorchButton } from '../components/TorchButton';
 import { FlashlightHeader } from '../components/FlashlightHeader';
+import { colors } from '@/core/theme';
 import { useTorchContext } from '../../../app/providers/AppProviders';
 import { MorseScreen } from './MorseScreen';
 import { StrobeScreen } from './StrobeScreen';
+import { SettingsScreen } from './SettingsScreen';
 
 export const FlashlightScreen = () => {
   const { isOn, mode, toggle, setMode } = useTorchContext();
+  const [showSettings, setShowSettings] = useState(false);
+
+  if (showSettings) {
+    return <SettingsScreen onBack={() => setShowSettings(false)} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlashlightHeader />
+      <FlashlightHeader onSettingsPress={() => setShowSettings(true)} />
       <View style={styles.content}>
         {mode === 'torch' && (
           <>
@@ -46,7 +53,7 @@ export const HomeScreen = FlashlightScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -57,8 +64,7 @@ const styles = StyleSheet.create({
 
   status: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: colors.textMuted,
     marginBottom: 24,
   },
 });
-

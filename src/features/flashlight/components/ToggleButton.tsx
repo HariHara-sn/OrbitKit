@@ -1,6 +1,7 @@
 import React from 'react';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/core/theme';
 
 interface ToggleButtonProps {
   isOn: boolean;
@@ -52,17 +53,17 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.card,
     borderWidth: 6,
-    borderColor: '#334155',
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
   },
 
   buttonOn: {
-    backgroundColor: '#FDE047',
-    borderColor: '#FACC15',
+    backgroundColor: colors.yellow,
+    borderColor: colors.yellowDark,
   },
 
   buttonPressed: {
@@ -74,10 +75,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     letterSpacing: 4,
-    color: '#64748B',
+    color: colors.iconInactive,
   },
 
   iconOn: {
-    color: '#713F12',
+    color: colors.textOnYellow,
   },
 });

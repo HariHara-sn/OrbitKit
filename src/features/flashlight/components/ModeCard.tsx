@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/core/theme';
 import type { FlashlightMode } from '../../../core/constants';
 import { MODE_LABELS } from '../../../core/constants';
 
@@ -20,20 +21,20 @@ const styles = StyleSheet.create({
   card: {
     padding: 16,
     borderRadius: 12,
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   cardActive: {
-    borderColor: '#FDE047',
-    backgroundColor: '#334155',
+    borderColor: colors.yellow,
+    backgroundColor: colors.border,
   },
   title: {
-    color: '#94A3B8',
+    color: colors.textMuted,
     fontSize: 16,
     fontWeight: '600',
   },
   titleActive: {
-    color: '#FDE047',
+    color: colors.yellow,
   },
 });

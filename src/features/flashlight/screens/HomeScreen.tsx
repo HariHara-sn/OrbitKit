@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/core/theme';
 import { BottomNav } from '../components/BottomNav';
 import { ToggleButton } from '../components/ToggleButton';
 import { useTorchContext } from '../../../context/TorchContext';
@@ -43,13 +44,13 @@ export const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.background,
   },
 
   header: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: colors.text,
     textAlign: 'center',
     paddingTop: 8,
     paddingBottom: 8,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
 
   status: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: colors.textMuted,
     marginBottom: 24,
   },
 });

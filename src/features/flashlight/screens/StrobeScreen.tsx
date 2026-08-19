@@ -2,6 +2,7 @@ import Slider from '@react-native-community/slider';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { colors } from '@/core/theme';
 import { TorchButton } from '../components/TorchButton';
 import { STROBE_MAX_INTERVAL, STROBE_MIN_INTERVAL } from '../../../core/constants';
 import { useTorchContext } from '../../../app/providers/AppProviders';
@@ -14,7 +15,7 @@ export const StrobeScreen = () => {
       <MaterialCommunityIcons
         name="lightning-bolt"
         size={100}
-        color="#FDE047"
+        color={colors.yellow}
       />
 
       <View style={styles.controls}>
@@ -25,9 +26,9 @@ export const StrobeScreen = () => {
           maximumValue={STROBE_MIN_INTERVAL}
           value={strobeSpeed}
           onValueChange={value => setStrobeSpeed(value)}
-          minimumTrackTintColor="#FDE047"
-          maximumTrackTintColor="#334155"
-          thumbTintColor="#FDE047"
+          minimumTrackTintColor={colors.yellow}
+          maximumTrackTintColor={colors.border}
+          thumbTintColor={colors.yellow}
           accessibilityLabel="Strobe frequency"
         />
         <View style={styles.rangeRow}>
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#F8FAFC',
+    color: colors.text,
     marginBottom: 16,
   },
 
@@ -77,6 +78,6 @@ const styles = StyleSheet.create({
 
   rangeLabel: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: colors.textMuted,
   },
 });

@@ -151,8 +151,6 @@ Each feature exposes its own routes to the application navigation layer.
 * [x] Strobe
 * [x] SOS
 * [x] Morse Code
-* [ ] DJ Mode refinement
-
 ### Route Optimization
 
 * [ ] Source selection

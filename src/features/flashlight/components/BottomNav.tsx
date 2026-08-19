@@ -1,10 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/core/theme';
 import { MODE_LABELS } from '../../../core/constants';
 import type { FlashlightMode } from '../../../core/constants';
 
-interface BottomNavProps { 
+interface BottomNavProps {
   mode: FlashlightMode;
   onModeChange: (mode: FlashlightMode) => void;
 }
@@ -39,9 +40,9 @@ export const BottomNav = ({ mode, onModeChange }: BottomNavProps) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.card,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#334155',
+    borderTopColor: colors.border,
     paddingTop: 10,
     paddingLeft: 8,
   },
@@ -54,16 +55,16 @@ const styles = StyleSheet.create({
   },
 
   tabActive: {
-    backgroundColor: '#FDE047',
+    backgroundColor: colors.yellow,
   },
 
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: colors.textMuted,
   },
 
   labelActive: {
-    color: '#713F12',
+    color: colors.textOnYellow,
   },
 });

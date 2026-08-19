@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MORSE_MAX_UNIT, MORSE_MIN_UNIT } from '../../../core/constants';
+import { colors } from '@/core/theme';
 import { useMorseTransmitter } from '../hooks/useMorseTransmitter';
 import {
   MORSE_LETTERS,
@@ -84,7 +85,7 @@ export const MorseScreen = () => {
             allowFontScaling={false}
             style={styles.input}
             placeholder="Type your message..!"
-            placeholderTextColor="#A8B3C7"
+            placeholderTextColor={colors.placeholder}
             value={message}
             maxLength={200}
             onChangeText={setMessage}
@@ -170,7 +171,7 @@ export const MorseScreen = () => {
             <MaterialCommunityIcons
               name={dropdown ? 'chevron-down' : 'chevron-up'}
               size={20}
-              color="white"
+              color={colors.white}
             />
           </Pressable>
         </View>
@@ -229,9 +230,9 @@ export const MorseScreen = () => {
           value={unit}
           disabled={isTransmitting}
           onValueChange={value => setUnit(value)}
-          minimumTrackTintColor="#FDE047"
-          maximumTrackTintColor="#334155"
-          thumbTintColor="#FDE047"
+          minimumTrackTintColor={colors.yellow}
+          maximumTrackTintColor={colors.border}
+          thumbTintColor={colors.yellow}
           accessibilityLabel="Morse transmission speed"
         />
         <View style={styles.rangeRow}>
@@ -251,14 +252,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignSelf: 'stretch',
-    backgroundColor: '#071827',
+    backgroundColor: colors.backgroundDark,
     paddingHorizontal: 14,
   },
 
   header: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: colors.text,
     textAlign: 'center',
     paddingTop: 6,
     paddingBottom: 4,
@@ -274,15 +275,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.8,
-    color: '#B487F8',
+    color: colors.primarySubtle,
     textTransform: 'uppercase',
   },
 
   inputCard: {
-    backgroundColor: '#1C2434',
+    backgroundColor: colors.cardDark,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#3B475E',
+    borderColor: colors.borderLight,
     paddingHorizontal: 14,
     paddingVertical: 8,
     minHeight: 64,
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-    color: '#F8FAFC',
+    color: colors.text,
     fontSize: 15,
     padding: 0,
     minHeight: 40,
@@ -299,17 +300,17 @@ const styles = StyleSheet.create({
 
   counter: {
     alignSelf: 'flex-end',
-    color: '#CBD5E1',
+    color: colors.textSubtle,
     fontSize: 16,
     paddingTop: 6,
   },
 
   outputCard: {
     marginTop: 16,
-    backgroundColor: '#1C2434',
+    backgroundColor: colors.cardDark,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#3B475E',
+    borderColor: colors.borderLight,
     minHeight: 56,
     justifyContent: 'center',
     alignItems: 'center',
@@ -325,13 +326,13 @@ const styles = StyleSheet.create({
   },
 
   outputChar: {
-    color: '#E2E8F0',
+    color: colors.textLight,
     fontSize: 16,
     fontStyle: 'italic',
   },
 
   outputCharActive: {
-    color: '#FDE047',
+    color: colors.yellow,
     fontWeight: '700',
   },
   morseReferenceRow: {
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: colors.white,
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
   },
   speedLabel: {
     marginTop: 16,
-    color: '#F8FAFC',
+    color: colors.text,
     fontSize: 16,
     marginBottom: 4,
   },
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
 
   rangeLabel: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: colors.textMuted,
   },
 
   buttonRow: {
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
 
   transmitButton: {
     flex: 1,
-    backgroundColor: '#7C3AED',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -390,14 +391,14 @@ const styles = StyleSheet.create({
 
   stopButton: {
     flex: 1,
-    backgroundColor: '#475569',
+    backgroundColor: colors.stopButton,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
 
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 1,
@@ -408,24 +409,24 @@ const styles = StyleSheet.create({
   },
 
   status: {
-    color: '#FDE047',
+    color: colors.yellow,
     fontSize: 12,
     textAlign: 'center',
     marginTop: 8,
   },
 
   referenceCard: {
-    backgroundColor: '#1C2434',
+    backgroundColor: colors.cardDark,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#3B475E',
+    borderColor: colors.borderLight,
     overflow: 'hidden',
     paddingBottom: 10,
   },
 
   tabsRow: {
     flexDirection: 'row',
-    backgroundColor: '#111827',
+    backgroundColor: colors.tabsRow,
   },
 
   tab: {
@@ -436,17 +437,17 @@ const styles = StyleSheet.create({
   },
 
   tabActive: {
-    backgroundColor: '#A78BFA',
+    backgroundColor: colors.primaryLight,
   },
 
   tabText: {
-    color: '#CBD5E1',
+    color: colors.textSubtle,
     fontSize: 16,
     fontWeight: '700',
   },
 
   tabTextActive: {
-    color: '#FFFFFF',
+    color: colors.white,
   },
 
   referenceScroll: {
@@ -468,13 +469,13 @@ const styles = StyleSheet.create({
   },
 
   referenceLetter: {
-    color: '#F8FAFC',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
 
   referenceCode: {
-    color: '#E2E8F0',
+    color: colors.textLight,
     fontSize: 16,
     letterSpacing: 0.5,
   },
