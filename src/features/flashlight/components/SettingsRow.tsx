@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/core/theme';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 
 interface SettingsRowProps {
   iconName: string;
@@ -19,38 +21,52 @@ export const SettingsRow = ({
   value,
   onValueChange,
   extra,
-}: SettingsRowProps) => (
-  <View style={[styles.wrapper, value && styles.wrapperGlow]}>
-    <View style={styles.row}>
-      <View style={[styles.iconContainer, value && styles.iconGlow]}>
-        <Icon
-          name={iconName}
-          size={22}
-          color={value ? colors.yellow : colors.iconInactive}
+}: SettingsRowProps) => {
+  const { trigger: haptic } = useHaptic();
+  const { playClick } = useSound();
+
+  const handleChange = useCallback(
+    (next: boolean) => {
+      haptic();
+      playClick();
+      onValueChange(next);
+    },
+    [haptic, playClick, onValueChange],
+  );
+
+  return (
+    <View style={[styles.wrapper, value && styles.wrapperGlow]}>
+      <View style={styles.row}>
+        <View style={[styles.iconContainer, value && styles.iconGlow]}>
+          <Icon
+            name={iconName}
+            size={22}
+            color={value ? colors.yellow : colors.iconInactive}
+          />
+        </View>
+        <View style={styles.textContainer}>
+          <Text
+            allowFontScaling={false}
+            style={[styles.title, value && styles.titleActive]}
+          >
+            {title}
+          </Text>
+          <Text allowFontScaling={false} style={styles.description}>
+            {description}
+          </Text>
+        </View>
+        <Switch
+          value={value}
+          onValueChange={handleChange}
+          trackColor={{ false: colors.border, true: colors.primary50 }}
+          thumbColor={value ? colors.primary : colors.textMuted}
+          ios_backgroundColor={colors.border}
         />
       </View>
-      <View style={styles.textContainer}>
-        <Text
-          allowFontScaling={false}
-          style={[styles.title, value && styles.titleActive]}
-        >
-          {title}
-        </Text>
-        <Text allowFontScaling={false} style={styles.description}>
-          {description}
-        </Text>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: colors.border, true: colors.primary50 }}
-        thumbColor={value ? colors.primary : colors.textMuted}
-        ios_backgroundColor={colors.border}
-      />
+      {extra}
     </View>
-    {extra}
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -63,6 +79,7 @@ const styles = StyleSheet.create({
   },
   wrapperGlow: {
     borderColor: colors.placeholder,
+    borderWidth: 0.3,
     ...Platform.select({
       ios: {
         shadowColor: colors.primary,

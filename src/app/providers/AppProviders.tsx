@@ -2,12 +2,17 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { FlashlightContextValue } from '../../features/flashlight/types/flashlight.types';
 import { useTorch } from '../../features/flashlight/hooks/useTorch';
-import { SettingsProvider } from './SettingsProvider';
+import { SettingsProvider, useSettings } from './SettingsProvider';
 
 const TorchContext = createContext<FlashlightContextValue | undefined>(undefined);
 
-export const AppProviders = ({ children }: { children: ReactNode }) => {
-  const torch = useTorch();
+const TorchProvider = ({ children }: { children: ReactNode }) => {
+  const { settings } = useSettings();
+
+  const torch = useTorch({
+    automaticOff: settings.automaticOff,
+    automaticOffTimer: settings.automaticOffTimer,
+  });
 
   const value = useMemo(
     () => ({
@@ -32,9 +37,13 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
     ],
   );
 
+  return <TorchContext.Provider value={value}>{children}</TorchContext.Provider>;
+};
+
+export const AppProviders = ({ children }: { children: ReactNode }) => {
   return (
     <SettingsProvider>
-      <TorchContext.Provider value={value}>{children}</TorchContext.Provider>
+      <TorchProvider>{children}</TorchProvider>
     </SettingsProvider>
   );
 };

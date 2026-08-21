@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/BottomNav';
@@ -6,6 +6,8 @@ import { TorchButton } from '../components/TorchButton';
 import { FlashlightHeader } from '../components/FlashlightHeader';
 import { colors } from '@/core/theme';
 import { useTorchContext } from '../../../app/providers/AppProviders';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 import { MorseScreen } from './MorseScreen';
 import { StrobeScreen } from './StrobeScreen';
 import { SettingsScreen } from './SettingsScreen';
@@ -13,6 +15,24 @@ import { SettingsScreen } from './SettingsScreen';
 export const FlashlightScreen = () => {
   const { isOn, mode, toggle, setMode } = useTorchContext();
   const [showSettings, setShowSettings] = useState(false);
+  const { trigger: haptic } = useHaptic();
+  const { playToggleOn, playToggleOff, playClick } = useSound();
+
+  const handleToggle = useCallback(() => {
+    haptic();
+    if (isOn) {
+      playToggleOff();
+    } else {
+      playToggleOn();
+    }
+    toggle();
+  }, [isOn, haptic, playToggleOn, playToggleOff, toggle]);
+
+  const handleSettingsPress = useCallback(() => {
+    haptic();
+    playClick();
+    setShowSettings(true);
+  }, [haptic, playClick]);
 
   if (showSettings) {
     return <SettingsScreen onBack={() => setShowSettings(false)} />;
@@ -20,14 +40,14 @@ export const FlashlightScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlashlightHeader onSettingsPress={() => setShowSettings(true)} />
+      <FlashlightHeader onSettingsPress={handleSettingsPress} />
       <View style={styles.content}>
         {mode === 'torch' && (
           <>
             <Text style={styles.status}>
               {isOn ? 'Torch is ON' : 'Tap to turn on'}
             </Text>
-            <TorchButton isOn={isOn} onPress={toggle} />
+            <TorchButton isOn={isOn} onPress={handleToggle} />
           </>
         )}
 
@@ -36,7 +56,7 @@ export const FlashlightScreen = () => {
             <Text style={styles.status}>
               {isOn ? 'White screen is ON' : 'Tap for white screen'}
             </Text>
-            <TorchButton isOn={isOn} onPress={toggle} />
+            <TorchButton isOn={isOn} onPress={handleToggle} />
           </>
         )}
 

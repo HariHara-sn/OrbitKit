@@ -27,3 +27,10 @@
 | **Rate Us**        | Rate OrbitKit on the App Store                     |
 | **Share App**      | Share OrbitKit with your friends                   |
 | **Privacy Policy** | Learn how OrbitKit collects and protects your data |
+
+
+
+## Architecture:
+1. Sound — new Android native SoundModule using ToneGenerator + JS service layer
+2. Haptic — React Native's built-in Vibration API, no native code needed
+3. Auto-off — timer logic inside useTorch, settings passed from AppProviders

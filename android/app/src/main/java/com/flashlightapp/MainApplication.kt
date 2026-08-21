@@ -7,6 +7,7 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.flashlightapp.modules.brightness.BrightnessPackage
+import com.flashlightapp.modules.sound.SoundPackage
 import com.flashlightapp.modules.torch.TorchPackage
 
 class MainApplication : Application(), ReactApplication {
@@ -18,8 +19,9 @@ class MainApplication : Application(), ReactApplication {
         PackageList(this).packages.apply {
           add(TorchPackage())
           add(BrightnessPackage())
+          add(SoundPackage())
         },
-    )
+    );
   }
 
   override fun onCreate() {

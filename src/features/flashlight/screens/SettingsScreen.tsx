@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -13,6 +13,8 @@ import { colors } from '@/core/theme';
 import { AUTO_OFF_TIMER_OPTIONS } from '@/core/constants';
 import { SettingsRow } from '../components/SettingsRow';
 import { useSettings } from '../../../app/providers/SettingsProvider';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -20,12 +22,29 @@ interface SettingsScreenProps {
 
 export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
   const { settings, setSetting } = useSettings();
+  const { trigger: haptic } = useHaptic();
+  const { playClick } = useSound();
+
+  const handleBack = useCallback(() => {
+    haptic();
+    playClick();
+    onBack();
+  }, [haptic, playClick, onBack]);
+
+  const handleTimerPress = useCallback(
+    (value: number) => {
+      haptic();
+      playClick();
+      setSetting('automaticOffTimer', value);
+    },
+    [haptic, playClick, setSetting],
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable
-          onPress={onBack}
+          onPress={handleBack}
           style={styles.backButton}
           accessibilityRole="button"
           accessibilityLabel="Go back">
@@ -126,7 +145,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
                     return (
                       <Pressable
                         key={option.value}
-                        onPress={() => setSetting('automaticOffTimer', option.value)}
+                        onPress={() => handleTimerPress(option.value)}
                         style={[
                           styles.timerOption,
                           selected && styles.timerOptionActive,
@@ -156,7 +175,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconContainer}>
-            <Icon name={ICONS.language} size={22} color={colors.primary} />
+            <Icon name={ICONS.language} size={22} color={colors.primaryLight} />
           </View>
           <View style={styles.infoTextContainer}>
             <Text allowFontScaling={false} style={styles.infoTitle}>
@@ -174,7 +193,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconContainer}>
-            <Icon name={ICONS.star} size={22} color={colors.primary} />
+            <Icon name={ICONS.star} size={22} color={colors.primaryLight} />
           </View>
           <Text allowFontScaling={false} style={styles.infoTitle}>
             Rate Us
@@ -183,7 +202,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconContainer}>
-            <Icon name={ICONS.share} size={22} color={colors.primary} />
+            <Icon name={ICONS.share} size={22} color={colors.primaryLight} />
           </View>
           <Text allowFontScaling={false} style={styles.infoTitle}>
             Share App
@@ -192,7 +211,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconContainer}>
-            <Icon name={ICONS.shieldCheckmark} size={22} color={colors.primary} />
+            <Icon name={ICONS.shieldCheckmark} size={22} color={colors.primaryLight} />
           </View>
           <Text allowFontScaling={false} style={styles.infoTitle}>
             Privacy Policy

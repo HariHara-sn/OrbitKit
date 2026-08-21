@@ -34,6 +34,8 @@ export const colors = {
   iconInactive: '#64748B',
   placeholder: '#A8B3C7',
   hint: '#D1D5DB',
+  lightdim : '#6d6d6d',
+
 
   stopButton: '#475569',
   tabsRow: '#111827',

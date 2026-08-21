@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/core/theme';
 import { MODE_LABELS } from '../../../core/constants';
 import type { FlashlightMode } from '../../../core/constants';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 
 interface BottomNavProps {
   mode: FlashlightMode;
@@ -14,6 +16,17 @@ const TABS: FlashlightMode[] = ['torch', 'white', 'strobe', 'morse'];
 
 export const BottomNav = ({ mode, onModeChange }: BottomNavProps) => {
   const insets = useSafeAreaInsets();
+  const { trigger: haptic } = useHaptic();
+  const { playClick } = useSound();
+
+  const handleTabPress = useCallback(
+    (item: FlashlightMode) => {
+      haptic();
+      playClick();
+      onModeChange(item);
+    },
+    [haptic, playClick, onModeChange],
+  );
 
   return (
     <View
@@ -23,7 +36,7 @@ export const BottomNav = ({ mode, onModeChange }: BottomNavProps) => {
         return (
           <Pressable
             key={item}
-            onPress={() => onModeChange(item)}
+            onPress={() => handleTabPress(item)}
             style={[styles.tab, active && styles.tabActive]}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}>

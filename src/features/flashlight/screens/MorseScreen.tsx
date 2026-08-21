@@ -1,5 +1,5 @@
 import Slider from '@react-native-community/slider';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -12,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MORSE_MAX_UNIT, MORSE_MIN_UNIT } from '../../../core/constants';
 import { colors } from '@/core/theme';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 import { useMorseTransmitter } from '../hooks/useMorseTransmitter';
 import {
   MORSE_LETTERS,
@@ -39,6 +41,8 @@ export const MorseScreen = () => {
   const [tab, setTab] = useState<MorseTab>('letters');
   const { isTransmitting, activeIndex, unit, setUnit, start, stop } =
     useMorseTransmitter();
+  const { trigger: haptic } = useHaptic();
+  const { playClick } = useSound();
 
   const morseCode = useMemo(
     () => (message.trim() ? encodeToMorse(message) : 'Your Morse code'),
@@ -63,11 +67,19 @@ export const MorseScreen = () => {
     [morseCode],
   );
 
-  const handleTransmit = () => {
+  const handleTransmit = useCallback(() => {
     if (message.trim() && !isTransmitting) {
+      haptic();
+      playClick();
       start(morseToSignals(morseCode));
     }
-  };
+  }, [message, isTransmitting, morseCode, start, haptic, playClick]);
+
+  const handleStop = useCallback(() => {
+    haptic();
+    playClick();
+    stop();
+  }, [stop, haptic, playClick]);
 
   const canTransmit = message.trim().length > 0 && !isTransmitting;
 
@@ -130,7 +142,7 @@ export const MorseScreen = () => {
             </Text>
           </Pressable>
           <Pressable
-            onPress={stop}
+            onPress={handleStop}
             disabled={!isTransmitting}
             style={[
               styles.stopButton,

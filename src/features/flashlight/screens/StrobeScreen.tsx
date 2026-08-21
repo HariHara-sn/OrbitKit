@@ -1,14 +1,28 @@
 import Slider from '@react-native-community/slider';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '@/core/theme';
 import { TorchButton } from '../components/TorchButton';
 import { STROBE_MAX_INTERVAL, STROBE_MIN_INTERVAL } from '../../../core/constants';
 import { useTorchContext } from '../../../app/providers/AppProviders';
+import { useHaptic } from '../hooks/useHaptic';
+import { useSound } from '../hooks/useSound';
 
 export const StrobeScreen = () => {
   const { isOn, toggle, strobeSpeed, setStrobeSpeed } = useTorchContext();
+  const { trigger: haptic } = useHaptic();
+  const { playToggleOn, playToggleOff } = useSound();
+
+  const handleToggle = useCallback(() => {
+    haptic();
+    if (isOn) {
+      playToggleOff();
+    } else {
+      playToggleOn();
+    }
+    toggle();
+  }, [isOn, haptic, playToggleOn, playToggleOff, toggle]);
 
   return (
     <View style={styles.container}>
@@ -37,7 +51,7 @@ export const StrobeScreen = () => {
         </View>
       </View>
 
-      <TorchButton isOn={isOn} onPress={toggle} />
+      <TorchButton isOn={isOn} onPress={handleToggle} />
     </View>
   );
 };
