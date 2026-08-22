@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from './app/providers/AppProviders';
+import { SettingsProvider } from './app/providers/SettingsProvider';
+import { SplashScreen } from './features/flashlight/screens/SplashScreen';
 import { Router } from './router';
 
-export function TorchProvider({ children }: { children: React.ReactNode }) {
-  return <AppProviders>{children}</AppProviders>;
-}
-
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+
+  const handleSplashFinish = useCallback(() => {
+    setSplashDone(true);
+  }, []);
+
   return (
     <SafeAreaProvider>
-      <AppProviders>
-        <Router />
-      </AppProviders>
+      <SettingsProvider>
+        <AppProviders>
+          {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
+          <Router />
+        </AppProviders>
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

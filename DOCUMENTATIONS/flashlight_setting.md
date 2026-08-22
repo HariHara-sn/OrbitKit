@@ -31,6 +31,17 @@
 
 
 ## Architecture:
-1. Sound — new Android native SoundModule using ToneGenerator + JS service layer
-2. Haptic — React Native's built-in Vibration API, no native code needed
-3. Auto-off — timer logic inside useTorch, settings passed from AppProviders
+1. Sound — new Android native SoundModule using ToneGenerator + JS service layer        [COMPLETED✅]
+2. Haptic — React Native's built-in Vibration API, no native code needed                [COMPLETED✅]
+3. Auto-off — timer logic inside useTorch, settings passed from AppProviders            [COMPLETED✅]
+4. Power Control                                                                        [COMPLETED✅] [Testing Pending ⚠️]
+
+| Battery Level | Action                                         |
+| ------------- | ---------------------------------------------- |
+| ≤ 10%         | Yellow warning banner appears below the header |
+| ≤ 5%          | Torch brightness dims to 30%                   |
+| ≤ 2%          | Flashlight turns off completely                |
+| Charging      | All battery protections are suspended          |
+
+5. Upcomming
+

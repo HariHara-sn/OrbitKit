@@ -12,6 +12,7 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
   const torch = useTorch({
     automaticOff: settings.automaticOff,
     automaticOffTimer: settings.automaticOffTimer,
+    powerControl: settings.powerControl,
   });
 
   const value = useMemo(
@@ -24,6 +25,9 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
       toggle: torch.toggle,
       turnOff: torch.turnOff,
       setMode: torch.setMode,
+      batteryLevel: torch.batteryLevel,
+      isCharging: torch.isCharging,
+      lowBatteryWarning: torch.lowBatteryWarning,
     }),
     [
       torch.isOn,
@@ -34,6 +38,9 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
       torch.toggle,
       torch.turnOff,
       torch.setMode,
+      torch.batteryLevel,
+      torch.isCharging,
+      torch.lowBatteryWarning,
     ],
   );
 

@@ -1,3 +1,16 @@
+export const APP_NAME = 'OrbitKit'; // currently not used
+
+export const SUPPORTED_LANGUAGES = [  // currently not used
+  'en',
+  'ta',
+  'hi',
+  'es',
+];
+
+export const DEFAULT_LANGUAGE = 'en'; // currently not used
+
+export const LOCATION_UPDATE_INTERVAL = 5000; // currently not used
+
 export type FlashlightMode = 'torch' | 'white' | 'morse' | 'strobe';
 
 export const MODE_LABELS: Record<FlashlightMode, string> = {

@@ -125,7 +125,23 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           description="Low battery warning below 10%"
           value={settings.powerControl}
           onValueChange={() => setSetting('powerControl', !settings.powerControl)}
+          extra={
+            settings.powerControl && (
+              <View style={styles.powerControlDoc}>
+                <Text allowFontScaling={false} style={styles.powerControlDocTitle}>
+                  📋 How Power Control works
+                </Text>
+                <Text allowFontScaling={false} style={styles.powerControlDocBody}>
+                  {'• Monitors battery level in the background.\n' +
+                    '• Shows a warning banner when battery drops below 10%.\n' +
+                    '• Automatically dims the torch at 5% to preserve charge.\n' +
+                    '• Turns the flashlight off at 2% to protect the battery.'}
+                </Text>
+              </View>
+            )
+          }
         />
+
 
         <SettingsRow
           iconName={ICONS.timer}
@@ -329,4 +345,23 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: 2,
   },
+  powerControlDoc: {
+    backgroundColor: colors.backgroundDark,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    gap: 8,
+  },
+  powerControlDocTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primaryLight,
+  },
+  powerControlDocBody: {
+    fontSize: 12,
+    color: colors.textSubtle,
+    lineHeight: 20,
+  },
 });
+

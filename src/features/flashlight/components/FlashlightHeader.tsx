@@ -3,6 +3,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ICONS } from '@/core/constants/icons';
 import { colors } from '@/core/theme';
+import CustomTooltip from '@/shared/components/Tooltip';
 
 interface FlashlightHeaderProps {
   title?: string;
@@ -16,15 +17,21 @@ export const FlashlightHeader = ({
   <View style={styles.headerContainer}>
     <Text style={styles.header}>{title}</Text>
 
-    <Pressable
-      onPress={onSettingsPress}
-      style={styles.settingsIcon}
-      accessibilityRole="button"
-      accessibilityLabel="Open settings"
-    >
-      <View style={styles.settingsGlow} />
-      <Icon name={ICONS.settings} size={30} color={colors.yellow} />
-    </Pressable>
+    <View style={styles.settingsSlot}>
+      <CustomTooltip content="Open settings" placement="bottom">
+        <Pressable
+          onPress={onSettingsPress}
+          style={styles.settingsIcon}
+          accessibilityRole="button"
+          accessibilityLabel="Open settings"
+          accessibilityHint="Opens application settings"
+          android_ripple={{ color: '#ddd', radius: 22 }}
+        >
+          <View style={styles.settingsGlow} />
+          <Icon name={ICONS.settings} size={30} color={colors.yellow} />
+        </Pressable>
+      </CustomTooltip>
+    </View>
   </View>
 );
 
@@ -36,6 +43,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     paddingTop: 8,
     paddingBottom: 8,
+    minHeight: 60,
   },
 
   header: {
@@ -44,9 +52,15 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
-  settingsIcon: {
+  settingsSlot: {
     position: 'absolute',
+    top: 8,
     right: 16,
+    width: 44,
+    height: 44,
+  },
+
+  settingsIcon: {
     width: 44,
     height: 44,
     alignItems: 'center',

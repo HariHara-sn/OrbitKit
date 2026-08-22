@@ -23,19 +23,14 @@ cd android
    adb install -r app/build/outputs/apk/release/app-release.apk
 
 
-# reduce app size form 70mb to 23mb
+## reduce app size form 70mb to 23mb
 changes are in gradle.properties, build.gradle
 then need to run - adb install -r android\app\build\outputs\apk\release\app-arm64-v8a-release.apk
 
 
+## List of all icons of `import Icon from 'react-native-vector-icons/Ionicons';`
+visit https://ionic.io/ionicons?utm_source=chatgpt.com
 
 
-# 1st commit message:
- flashlight app 
-
-# 2nd commit message:
- app size reduction
 
 
-# 3rd commit message: [dintImplemented] - use the opencode latestmess to continue to reduce to even smaller
- godMode appsize reduction

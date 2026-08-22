@@ -12,4 +12,7 @@ export interface FlashlightContextValue extends FlashlightState {
   toggle: () => Promise<void>;
   turnOff: () => void;
   setMode: (mode: FlashlightMode) => void;
+  batteryLevel: number;
+  isCharging: boolean;
+  lowBatteryWarning: boolean;
 }

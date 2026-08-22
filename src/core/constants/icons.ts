@@ -1,6 +1,8 @@
+
 export const ICONS = {
   settings: 'settings-outline',
   back: 'arrow-back-outline',
+  Clipboard:'clipboard-outline',
   close: 'close-outline',
   chevronDown: 'chevron-down-outline',
   chevronUp: 'chevron-up-outline',
