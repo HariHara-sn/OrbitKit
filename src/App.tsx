@@ -1,20 +1,18 @@
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TorchProvider, useTorchContext } from './context/TorchContext';
-import { HomeScreen } from './screens/HomeScreen';
-import { WhiteScreen } from './screens/WhiteScreen';
+import { AppProviders } from './app/providers/AppProviders';
+import { Router } from './router';
 
-const AppContent = () => {
-  const { isWhiteScreenVisible } = useTorchContext();
-  return isWhiteScreenVisible ? <WhiteScreen /> : <HomeScreen />;
-};
+export function TorchProvider({ children }: { children: React.ReactNode }) {
+  return <AppProviders>{children}</AppProviders>;
+}
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <TorchProvider>
-        <AppContent />
-      </TorchProvider>
+      <AppProviders>
+        <Router />
+      </AppProviders>
     </SafeAreaProvider>
   );
 }

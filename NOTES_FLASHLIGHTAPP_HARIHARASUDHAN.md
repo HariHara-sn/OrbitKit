@@ -19,7 +19,8 @@ stp2 : Rebuild the app
 cd android
 ./gradlew assembleRelease
 
-2. adb install -r app/build/outputs/apk/release/app-release.apk
+2. cd ..
+   adb install -r app/build/outputs/apk/release/app-release.apk
 
 
 # reduce app size form 70mb to 23mb
