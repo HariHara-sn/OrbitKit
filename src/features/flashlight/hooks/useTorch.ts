@@ -6,7 +6,6 @@ import {
 } from '../../../core/constants';
 import type { FlashlightMode } from '../../../core/constants';
 import { flashlightService } from '../services/flashlightService';
-import { requestCameraPermission } from '../../../shared/services/permissions/permissionsService';
 import { batteryService, type BatteryInfo } from '../services/batteryService';
 
 interface UseTorchOptions {
@@ -46,10 +45,6 @@ export const useTorch = (options?: UseTorchOptions) => {
 
   const turnOn = useCallback(async () => {
     if (mode === 'torch' || mode === 'strobe') {
-      const granted = await requestCameraPermission();
-      if (!granted) {
-        return;
-      }
       if (mode === 'torch') {
         const success = await flashlightService.setTorchMode(true);
         if (!success) {

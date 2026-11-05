@@ -8,4 +8,4 @@ export { RouteNames } from './route_names';
 export type { RouteName } from './route_names';
 export { AppRoutes } from './app_routes';
 export type { RouteDefinition } from './app_routes';
-export { canNavigateTo, routeRequiresCamera } from './route_guards';
+export { canNavigateTo } from './route_guards';

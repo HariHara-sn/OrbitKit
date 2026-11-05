@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MORSE_DEFAULT_UNIT } from '../../../core/constants';
 import { flashlightService } from '../services/flashlightService';
-import { requestCameraPermission } from '../../../shared/services/permissions/permissionsService';
 import type { MorseSignal } from '../utils/morse';
 
 const delay = (ms: number) =>
@@ -24,10 +23,6 @@ export const useMorseTransmitter = () => {
   const start = useCallback(
     async (signals: MorseSignal[]) => {
       if (runningRef.current || signals.length === 0) {
-        return;
-      }
-      const granted = await requestCameraPermission();
-      if (!granted) {
         return;
       }
 
