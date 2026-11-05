@@ -13,12 +13,15 @@ import { useSound } from '../hooks/useSound';
 import { MorseScreen } from './MorseScreen';
 import { StrobeScreen } from './StrobeScreen';
 import { SettingsScreen } from './SettingsScreen';
+import { ExitAppModal } from '../components/ExitAppModal';
+import { flashlightService } from '../services/flashlightService';
 
 const SWIPE_THRESHOLD = 80;
 
 export const FlashlightScreen = () => {
   const { isOn, mode, toggle, setMode, lowBatteryWarning, batteryLevel } = useTorchContext();
   const [showSettings, setShowSettings] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
   const { trigger: haptic } = useHaptic();
   const { playToggleOn, playToggleOff, playClick } = useSound();
   const swipeHandled = useRef(false);
@@ -54,24 +57,39 @@ export const FlashlightScreen = () => {
     [mode, haptic, setMode],
   );
 
-  // Block Android hardware back from exiting the app.
-  // From morse/strobe, back goes to torch. From torch/white, back is swallowed.
+  // Handle Android hardware back navigation.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (showExitModal) {
+        setShowExitModal(false);
+        return true;
+      }
       if (showSettings) {
         setShowSettings(false);
         return true;
       }
-      if (mode === 'morse' || mode === 'strobe') {
+      if (mode === 'morse' || mode === 'strobe' || mode === 'white') {
         haptic();
         setMode('torch');
         return true;
       }
-      // On home (torch/white), block exit — flashlight apps should not quit on back
+      if (mode === 'torch') {
+        haptic();
+        setShowExitModal(true);
+        return true;
+      }
       return true;
     });
     return () => sub.remove();
-  }, [mode, haptic, setMode, showSettings]);
+  }, [mode, haptic, setMode, showSettings, showExitModal]);
+
+  const handleConfirmExit = useCallback(() => {
+    if (isOn) {
+      flashlightService.setTorchMode(false);
+    }
+    setShowExitModal(false);
+    BackHandler.exitApp();
+  }, [isOn]);
 
   const handleToggle = useCallback(() => {
     haptic();
@@ -127,6 +145,11 @@ export const FlashlightScreen = () => {
         {mode === 'strobe' && <StrobeScreen />}
       </View>
       <BottomNav mode={mode} onModeChange={setMode} />
+      <ExitAppModal
+        visible={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirmExit={handleConfirmExit}
+      />
     </SafeAreaView>
   );
 };
