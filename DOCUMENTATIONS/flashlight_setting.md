@@ -13,6 +13,7 @@
 | **Haptic**                      | Vibration feedback for controls                                           |
 | **Power control**               | Low battery warning below 10% (pop for set warning perctage using slider) |
 | **Automatic Off**               | Turn off flashlight automatically (pop for set timer 10sec to 30min)      |
+| **Clap to find**                | clap 2 times, then the phone flash automatically turned on                |
 
 ### General
 
@@ -44,5 +45,5 @@
 | Charging      | All battery protections are suspended                 | 
 `TEST` : adb shell dumpsys battery set level 8
 
-5. Upcomming
+5. Automatic on — on startup useTorch automatically invokes turnOn() if enabled, persisted via Android SharedPreferences   [COMPLETED✅]
 

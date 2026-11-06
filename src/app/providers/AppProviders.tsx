@@ -13,6 +13,7 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
     automaticOff: settings.automaticOff,
     automaticOffTimer: settings.automaticOffTimer,
     powerControl: settings.powerControl,
+    automaticOn: settings.automaticOn,
   });
 
   const value = useMemo(

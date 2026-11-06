@@ -24,6 +24,7 @@ export interface UseTorchOptions {
   automaticOff: boolean;
   automaticOffTimer: number;
   powerControl: boolean;
+  automaticOn?: boolean;
 }
 
 export const useTorch = (options?: UseTorchOptions) => {
@@ -33,6 +34,7 @@ export const useTorch = (options?: UseTorchOptions) => {
   const [isDimmed, setIsDimmed] = useState(false);
   const autoOffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const turnOnTimeRef = useRef<number | null>(null);
+  const hasTriggeredAutoOnRef = useRef(false);
 
   // Unified battery hook: monitors level, charging state, event broadcasts and periodic polls
   const battery = useBattery(options?.powerControl ?? false);
@@ -89,6 +91,17 @@ export const useTorch = (options?: UseTorchOptions) => {
     turnOnTimeRef.current = Date.now();
     setIsOn(true);
   }, [mode, options?.powerControl, battery]);
+
+  // Automatic On: Turn on flashlight on startup when enabled
+  useEffect(() => {
+    if (hasTriggeredAutoOnRef.current) {
+      return;
+    }
+    if (options?.automaticOn) {
+      hasTriggeredAutoOnRef.current = true;
+      turnOn();
+    }
+  }, [options?.automaticOn, turnOn]);
 
   // Strobe effect
   useEffect(() => {

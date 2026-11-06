@@ -93,6 +93,28 @@ export const flashlightService = {
     }
     BrightnessModule.resetBrightness();
   },
+
+  getSetting: async (key: string, defaultValue: string): Promise<string> => {
+    try {
+      if (!TorchModule?.getSetting) {
+        return defaultValue;
+      }
+      return await TorchModule.getSetting(key, defaultValue);
+    } catch {
+      return defaultValue;
+    }
+  },
+
+  setSetting: async (key: string, value: string): Promise<boolean> => {
+    try {
+      if (!TorchModule?.setSetting) {
+        return false;
+      }
+      return await TorchModule.setSetting(key, value);
+    } catch {
+      return false;
+    }
+  },
 };
 
 export const FlashlightModule = flashlightService;

@@ -155,6 +155,28 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     cancelAutoOffInternal()
   }
 
+  @ReactMethod
+  fun getSetting(key: String, defaultValue: String, promise: Promise) {
+    try {
+      val prefs = reactContext.getSharedPreferences("flashlight_settings", Context.MODE_PRIVATE)
+      val value = prefs.getString(key, defaultValue) ?: defaultValue
+      promise.resolve(value)
+    } catch (_: Exception) {
+      promise.resolve(defaultValue)
+    }
+  }
+
+  @ReactMethod
+  fun setSetting(key: String, value: String, promise: Promise) {
+    try {
+      val prefs = reactContext.getSharedPreferences("flashlight_settings", Context.MODE_PRIVATE)
+      prefs.edit().putString(key, value).apply()
+      promise.resolve(true)
+    } catch (_: Exception) {
+      promise.resolve(false)
+    }
+  }
+
   private fun cancelAutoOffInternal() {
     autoOffRunnable?.let {
       mainHandler.removeCallbacks(it)

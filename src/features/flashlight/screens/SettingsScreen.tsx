@@ -71,6 +71,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           description="Turn on flashlight on startup"
           value={settings.automaticOn}
           onValueChange={() => setSetting('automaticOn', !settings.automaticOn)}
+          testID="setting-automatic-on-switch"
         />
 
         <SettingsRow
