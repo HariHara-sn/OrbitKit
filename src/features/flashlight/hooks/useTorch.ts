@@ -11,6 +11,8 @@ import {
 } from '../../../core/constants';
 import type { FlashlightMode } from '../../../core/constants';
 import { flashlightService } from '../services/flashlightService';
+import { shakeService } from '../services/shakeService';
+import { clapService } from '../services/clapService';
 import { useBattery } from './useBattery';
 
 export {
@@ -26,6 +28,8 @@ export interface UseTorchOptions {
   powerControl: boolean;
   automaticOn?: boolean;
   flashlightStayOn?: boolean;
+  shakeToSwitch?: boolean;
+  clapToFind?: boolean;
 }
 
 export const useTorch = (options?: UseTorchOptions) => {
@@ -245,6 +249,51 @@ export const useTorch = (options?: UseTorchOptions) => {
     }
     await turnOn();
   }, [isOn, turnOff, turnOn]);
+
+  // Shake to switch: Shake your phone to turn on/off flashlight
+  useEffect(() => {
+    if (!options?.shakeToSwitch) {
+      shakeService.stopWatching();
+      return;
+    }
+
+    shakeService.startWatching();
+    const unsub = shakeService.onShake(() => {
+      toggle();
+    });
+
+    return () => {
+      unsub();
+      shakeService.stopWatching();
+    };
+  }, [options?.shakeToSwitch, toggle]);
+
+  // Synchronize torch ON/OFF state to ClapModule for 2-claps-on / 1-clap-off
+  useEffect(() => {
+    clapService.setTorchState(isOn);
+  }, [isOn]);
+
+  // Clap to find: 2 claps to turn ON, 1 clap to turn OFF
+  useEffect(() => {
+    if (!options?.clapToFind) {
+      clapService.stopListening();
+      return;
+    }
+
+    clapService.startListening();
+    const unsubTurnOn = clapService.onClapTurnOn(() => {
+      turnOn();
+    });
+    const unsubTurnOff = clapService.onClapTurnOff(() => {
+      turnOff();
+    });
+
+    return () => {
+      unsubTurnOn();
+      unsubTurnOff();
+      clapService.stopListening();
+    };
+  }, [options?.clapToFind, turnOn, turnOff]);
 
   const setMode = useCallback(
     (nextMode: FlashlightMode) => {

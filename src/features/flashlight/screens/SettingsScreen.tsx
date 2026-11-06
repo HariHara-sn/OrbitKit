@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
 import {
+  PermissionsAndroid,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -39,6 +41,34 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
     },
     [haptic, playClick, setSetting],
   );
+
+  const handleClapToggle = useCallback(async () => {
+    haptic();
+    playClick();
+    if (!settings.clapToFind) {
+      if (Platform.OS === 'android') {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            {
+              title: 'Microphone Permission',
+              message: 'Flashlight App needs microphone access to detect claps.',
+              buttonPositive: 'OK',
+              buttonNegative: 'Cancel',
+            },
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            return;
+          }
+        } catch {
+          return;
+        }
+      }
+      setSetting('clapToFind', true);
+    } else {
+      setSetting('clapToFind', false);
+    }
+  }, [haptic, playClick, settings.clapToFind, setSetting]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,6 +119,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           description="Shake your phone to turn on/off flashlight"
           value={settings.shakeToSwitch}
           onValueChange={() => setSetting('shakeToSwitch', !settings.shakeToSwitch)}
+          testID="setting-shake-to-switch-switch"
         />
 
         <SettingsRow
@@ -192,6 +223,15 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
               </View>
             )
           }
+        />
+
+        <SettingsRow
+          iconName={ICONS.mic}
+          title="Clap to find"
+          description="2 claps to turn on, 1 clap to turn off"
+          value={settings.clapToFind}
+          onValueChange={handleClapToggle}
+          testID="setting-clap-to-find-switch"
         />
 
         <Text allowFontScaling={false} style={styles.sectionLabel}>

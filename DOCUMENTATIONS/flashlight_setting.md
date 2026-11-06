@@ -46,4 +46,6 @@
 `TEST` : adb shell dumpsys battery set level 8
 
 5. Automatic on — on startup useTorch automatically invokes turnOn() if enabled, persisted via Android SharedPreferences   [COMPLETED✅]
-6. Flashlight stay on — native screenOffReceiver monitors ACTION_SCREEN_OFF; if disabled, shuts off torch when screen locks [COMPLETED✅]
+6. Flashlight stay on — native screenOffReceiver monitors ACTION_SCREEN_OFF; Tracks flashlightStayOn state, loaded directly from native SharedPreferences on startup and synced live. [COMPLETED✅]
+7. Shake to switch — native ShakeModule isolates dynamic linear acceleration (G-Force)(filtering gravity) and requires 3 distinct strokes (>13.5 m/s²) within 750ms to toggle torch, eliminating false triggers from tilts and drops [COMPLETED✅]
+8. Clap to find — native ClapModule samples 16kHz PCM audio; requires 2 claps to turn ON, and 1 clap to turn OFF with 1200ms cooldown [COMPLETED✅]

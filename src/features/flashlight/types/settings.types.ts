@@ -9,6 +9,7 @@ export interface SettingsState {
   powerControl: boolean;
   automaticOff: boolean;
   automaticOffTimer: number;
+  clapToFind: boolean;
 }
 
 export type SettingsKey = keyof SettingsState;

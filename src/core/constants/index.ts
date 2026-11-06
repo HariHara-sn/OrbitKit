@@ -58,4 +58,5 @@ export const DEFAULT_SETTINGS = {
   powerControl: false,
   automaticOff: false,
   automaticOffTimer: AUTO_OFF_TIMER_NEVER,
+  clapToFind: false,
 } as const;

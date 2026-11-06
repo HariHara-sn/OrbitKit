@@ -57,6 +57,21 @@ describe('Flashlight & Power Control E2E', () => {
       await element(by.id('setting-flashlight-stay-on-switch')).tap();
     });
 
+    it('should toggle Shake to switch switch in SettingsScreen', async () => {
+      await expect(element(by.id('setting-shake-to-switch-switch'))).toBeVisible();
+      await element(by.id('setting-shake-to-switch-switch')).tap();
+      await element(by.id('setting-shake-to-switch-switch')).tap();
+    });
+
+    it('should scroll and toggle Clap to find switch in SettingsScreen', async () => {
+      await waitFor(element(by.id('setting-clap-to-find-switch')))
+        .toBeVisible()
+        .whileElement(by.id('settings-scroll'))
+        .scroll(150, 'down');
+      await element(by.id('setting-clap-to-find-switch')).tap();
+      await element(by.id('setting-clap-to-find-switch')).tap();
+    });
+
     it('should navigate back to Torch screen when back button is pressed', async () => {
       await element(by.id('settings-back-button')).tap();
       await expect(element(by.id('torch-toggle-button'))).toBeVisible();

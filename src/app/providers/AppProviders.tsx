@@ -15,6 +15,8 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
     powerControl: settings.powerControl,
     automaticOn: settings.automaticOn,
     flashlightStayOn: settings.flashlightStayOn,
+    shakeToSwitch: settings.shakeToSwitch,
+    clapToFind: settings.clapToFind,
   });
 
   const value = useMemo(
