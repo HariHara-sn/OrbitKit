@@ -21,6 +21,8 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
   private val mainHandler = Handler(Looper.getMainLooper())
   private var autoOffRunnable: Runnable? = null
   private var wakeLock: PowerManager.WakeLock? = null
+  private var torchCallback: CameraManager.TorchCallback? = null
+  private var callbackRegistered = false
 
   private fun getCameraId(cameraManager: CameraManager): String {
     return cameraManager.cameraIdList.firstOrNull { id ->
@@ -28,6 +30,54 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
         .getCameraCharacteristics(id)
         .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
     } ?: throw IllegalStateException("No camera with flash available")
+  }
+
+  override fun initialize() {
+    super.initialize()
+    registerTorchCallback()
+  }
+
+  private fun registerTorchCallback() {
+    if (callbackRegistered || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
+    try {
+      val cameraManager =
+        reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+      val targetCameraId = getCameraId(cameraManager)
+
+      torchCallback = object : CameraManager.TorchCallback() {
+        override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
+          if (cameraId == targetCameraId) {
+            reactContext
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit("torchStateChanged", enabled)
+          }
+        }
+
+        override fun onTorchModeUnavailable(cameraId: String) {
+          if (cameraId == targetCameraId) {
+            reactContext
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit("torchStateChanged", false)
+          }
+        }
+      }
+
+      cameraManager.registerTorchCallback(torchCallback!!, mainHandler)
+      callbackRegistered = true
+    } catch (_: Exception) {}
+  }
+
+  private fun unregisterTorchCallback() {
+    if (callbackRegistered && torchCallback != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      try {
+        val cameraManager =
+          reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        cameraManager.unregisterTorchCallback(torchCallback!!)
+      } catch (_: Exception) {}
+      torchCallback = null
+      callbackRegistered = false
+    }
   }
 
   @ReactMethod
@@ -124,7 +174,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun addListener(eventName: String) {
-    // Required for NativeEventEmitter
+    registerTorchCallback()
   }
 
   @ReactMethod
@@ -135,5 +185,6 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
   override fun invalidate() {
     super.invalidate()
     cancelAutoOffInternal()
+    unregisterTorchCallback()
   }
 }

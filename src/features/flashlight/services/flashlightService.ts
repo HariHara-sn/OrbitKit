@@ -71,6 +71,15 @@ export const flashlightService = {
     return () => sub.remove();
   },
 
+  onTorchStateChanged: (callback: (enabled: boolean) => void): (() => void) => {
+    const emitter = getTorchEmitter();
+    if (!emitter) {
+      return () => {};
+    }
+    const sub = emitter.addListener('torchStateChanged', callback);
+    return () => sub.remove();
+  },
+
   setBrightness: (brightness: number): void => {
     if (!BrightnessModule?.setBrightness) {
       return;

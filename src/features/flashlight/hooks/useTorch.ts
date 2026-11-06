@@ -146,6 +146,31 @@ export const useTorch = (options?: UseTorchOptions) => {
     return unsub;
   }, [turnOff]);
 
+  // Synchronize with external/hardware changes (e.g. Android Quick Settings tile, lockscreen gesture)
+  useEffect(() => {
+    const unsub = flashlightService.onTorchStateChanged(enabled => {
+      setModeState(currentMode => {
+        if (currentMode === 'torch') {
+          setIsOn(currentIsOn => {
+            if (currentIsOn !== enabled) {
+              if (!enabled) {
+                clearAutoOffTimer();
+                flashlightService.cancelAutoOff();
+                turnOnTimeRef.current = null;
+              } else {
+                turnOnTimeRef.current = Date.now();
+              }
+              return enabled;
+            }
+            return currentIsOn;
+          });
+        }
+        return currentMode;
+      });
+    });
+    return unsub;
+  }, [clearAutoOffTimer]);
+
   // Catch up on auto-off expiration when app is foregrounded from background
   useEffect(() => {
     const sub = AppState.addEventListener('change', nextState => {
