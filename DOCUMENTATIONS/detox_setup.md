@@ -4,27 +4,6 @@
    3. npx detox init
 
 
-### ⭐What Was Configured:  
-
-#### 1. Mapped out [`.detoxrc.js`](D:/FlashlightApp/.detoxrc.js)
-- Pointed `binaryPath` to your CPU architecture APK: `android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk`.
-- Pointed `testBinaryPath` to `android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk`.
-
-#### 2. Native Android Instrumentation Setup
-- Created [`DetoxTest.java`](D:/FlashlightApp/android/app/src/androidTest/java/com/flashlightapp/DetoxTest.java) under `android/app/src/androidTest/java/com/flashlightapp/`.
-- Added the Detox maven repository in [`android/build.gradle`](D:/FlashlightApp/android/build.gradle).
-- Added `androidTestImplementation('com.wix:detox:+')`, test runner, and Espresso dependencies in [`android/app/build.gradle`](D:/FlashlightApp/android/app/build.gradle).
-- Configured [`network_security_config.xml`](D:/FlashlightApp/android/app/src/main/res/xml/network_security_config.xml) to permit local WebSocket traffic for Detox and Metro.
-
-#### 3. Exposed `testID` Elements in React Native
-- **Torch Toggle Button**: Added `testID` prop support in [`ToggleButton.tsx`](D:/FlashlightApp/src/shared/components/Button/ToggleButton.tsx) and exposed `testID="torch-toggle-button"`.
-- **Status Text**: Exposed `testID="torch-status-text"` in [`FlashlightWrapper.tsx`](D:/FlashlightApp/src/features/flashlight/screens/FlashlightWrapper.tsx).
-- **Navigation Tabs**: Exposed `testID="tab-torch"`, `testID="tab-white"`, `testID="tab-strobe"`, and `testID="tab-morse"` in [`BottomNav.tsx`](D:/FlashlightApp/src/features/flashlight/components/BottomNav.tsx).
-
-#### 4. Created First E2E Test ([`e2e/starter.test.js`](D:/FlashlightApp/e2e/starter.test.js))
-
----
-
 # ⭐How to Run Detox Anytime:
 
 1. **Ensure Metro Bundler is running**:
@@ -51,6 +30,27 @@
 
 
 
+
+### ⭐What Was Configured:  
+
+#### 1. Mapped out [`.detoxrc.js`](D:/FlashlightApp/.detoxrc.js)
+- Pointed `binaryPath` to your CPU architecture APK: `android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk`.
+- Pointed `testBinaryPath` to `android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk`.
+
+#### 2. Native Android Instrumentation Setup
+- Created [`DetoxTest.java`](D:/FlashlightApp/android/app/src/androidTest/java/com/flashlightapp/DetoxTest.java) under `android/app/src/androidTest/java/com/flashlightapp/`.
+- Added the Detox maven repository in [`android/build.gradle`](D:/FlashlightApp/android/build.gradle).
+- Added `androidTestImplementation('com.wix:detox:+')`, test runner, and Espresso dependencies in [`android/app/build.gradle`](D:/FlashlightApp/android/app/build.gradle).
+- Configured [`network_security_config.xml`](D:/FlashlightApp/android/app/src/main/res/xml/network_security_config.xml) to permit local WebSocket traffic for Detox and Metro.
+
+#### 3. Exposed `testID` Elements in React Native
+- **Torch Toggle Button**: Added `testID` prop support in [`ToggleButton.tsx`](D:/FlashlightApp/src/shared/components/Button/ToggleButton.tsx) and exposed `testID="torch-toggle-button"`.
+- **Status Text**: Exposed `testID="torch-status-text"` in [`FlashlightWrapper.tsx`](D:/FlashlightApp/src/features/flashlight/screens/FlashlightWrapper.tsx).
+- **Navigation Tabs**: Exposed `testID="tab-torch"`, `testID="tab-white"`, `testID="tab-strobe"`, and `testID="tab-morse"` in [`BottomNav.tsx`](D:/FlashlightApp/src/features/flashlight/components/BottomNav.tsx).
+
+#### 4. Created First E2E Test ([`e2e/starter.test.js`](D:/FlashlightApp/e2e/starter.test.js))
+
+---
 
 
 
