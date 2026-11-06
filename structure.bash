@@ -13,7 +13,7 @@ src/
 ├── core/
 │   ├── config/
 │   ├── theme/
-│   ├── constants/
+│   ├── constants/  - Put constants there, when they are global/shared application constants.
 │   └── assets/
 │
 ├── shared/

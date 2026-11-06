@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTorchContext } from '../providers/AppProviders';
-import { FlashlightScreen } from '../../features/flashlight/screens/FlashlightScreen';
+import { FlashlightScreen } from '../../features/flashlight/screens/FlashlightWrapper';
 import { WhiteScreen } from '../../features/flashlight/screens/WhiteScreen';
 
 export const AppNavigator = () => {

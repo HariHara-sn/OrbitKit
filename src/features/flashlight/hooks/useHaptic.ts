@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Vibration } from 'react-native';
 import { useSettings } from '../../../app/providers/SettingsProvider';
 
-const HAPTIC_DURATION = 50;
+const HAPTIC_DURATION = 30;
 
 export const useHaptic = () => {
   const { settings } = useSettings();

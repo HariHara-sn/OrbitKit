@@ -138,3 +138,5 @@ dist/
 *.log
 .viminfo
 .history
+
+settings.json
