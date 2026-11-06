@@ -9,6 +9,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.flashlightapp.modules.battery.BatteryPackage
 import com.flashlightapp.modules.brightness.BrightnessPackage
 import com.flashlightapp.modules.clap.ClapPackage
+import com.flashlightapp.modules.notification.NotificationToolbarPackage
 import com.flashlightapp.modules.shake.ShakePackage
 import com.flashlightapp.modules.sound.SoundPackage
 import com.flashlightapp.modules.torch.TorchPackage
@@ -26,6 +27,7 @@ class MainApplication : Application(), ReactApplication {
           add(BatteryPackage())
           add(ShakePackage())
           add(ClapPackage())
+          add(NotificationToolbarPackage())
         },
     );
   }

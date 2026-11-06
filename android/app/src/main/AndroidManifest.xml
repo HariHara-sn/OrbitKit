@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
@@ -29,5 +31,21 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <receiver
+        android:name=".modules.notification.NotificationToggleReceiver"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.flashlightapp.ACTION_NOTIFICATION_TOGGLE" />
+        </intent-filter>
+      </receiver>
+
+      <receiver
+        android:name=".modules.notification.NotificationBootReceiver"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+      </receiver>
     </application>
 </manifest>

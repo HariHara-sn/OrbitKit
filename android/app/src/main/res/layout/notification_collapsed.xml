@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notif_collapsed_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:paddingStart="2dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp">
+
+    <TextView
+        android:id="@+id/tv_collapsed_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Flashlight"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/tv_collapsed_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Torch is ON • Tap to turn off"
+        android:textColor="#9CA3AF"
+        android:textSize="12sp"
+        android:singleLine="true" />
+</LinearLayout>

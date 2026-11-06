@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, BackHandler, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { AppState, BackHandler, DeviceEventEmitter, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { BottomNav } from '../components/BottomNav';
@@ -16,6 +16,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { ExitAppModal } from '../components/ExitAppModal';
 import { LowBatteryWarningBanner } from '../components/LowBatteryWarningBanner';
 import { flashlightService } from '../services/flashlightService';
+import { notificationToolbarService } from '../services/notificationToolbarService';
 
 const SWIPE_THRESHOLD = 80;
 
@@ -90,6 +91,20 @@ export const FlashlightScreen = () => {
       if (nextState !== 'active') {
         setShowExitModal(false);
       }
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Handle opening settings directly when launched or triggered from notification
+  useEffect(() => {
+    notificationToolbarService.checkInitialOpenSettings().then(shouldOpen => {
+      if (shouldOpen) {
+        setShowSettings(true);
+      }
+    });
+
+    const sub = DeviceEventEmitter.addListener('openSettings', () => {
+      setShowSettings(true);
     });
     return () => sub.remove();
   }, []);

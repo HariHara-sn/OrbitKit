@@ -63,6 +63,12 @@ describe('Flashlight & Power Control E2E', () => {
       await element(by.id('setting-shake-to-switch-switch')).tap();
     });
 
+    it('should toggle Notification toolbar switch in SettingsScreen', async () => {
+      await expect(element(by.id('setting-notification-toolbar-switch'))).toBeVisible();
+      await element(by.id('setting-notification-toolbar-switch')).tap();
+      await element(by.id('setting-notification-toolbar-switch')).tap();
+    });
+
     it('should scroll and toggle Clap to find switch in SettingsScreen', async () => {
       await waitFor(element(by.id('setting-clap-to-find-switch')))
         .toBeVisible()

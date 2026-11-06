@@ -17,6 +17,7 @@ import { SettingsRow } from '../components/SettingsRow';
 import { useSettings } from '../../../app/providers/SettingsProvider';
 import { useHaptic } from '../hooks/useHaptic';
 import { useSound } from '../hooks/useSound';
+import { notificationToolbarService } from '../services/notificationToolbarService';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -69,6 +70,36 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
       setSetting('clapToFind', false);
     }
   }, [haptic, playClick, settings.clapToFind, setSetting]);
+
+  const handleNotificationToolbarToggle = useCallback(async () => {
+    haptic();
+    playClick();
+    if (!settings.notificationToolbarToggle) {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            {
+              title: 'Notification Permission',
+              message: 'Allow Flashlight App to display the shortcut in your notification bar and lock screen.',
+              buttonPositive: 'Allow',
+              buttonNegative: 'Deny',
+            },
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            return;
+          }
+        } catch {
+          return;
+        }
+      }
+      setSetting('notificationToolbarToggle', true);
+      notificationToolbarService.setToolbarEnabled(true);
+    } else {
+      setSetting('notificationToolbarToggle', false);
+      notificationToolbarService.setToolbarEnabled(false);
+    }
+  }, [haptic, playClick, settings.notificationToolbarToggle, setSetting]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -127,7 +158,8 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           title="Notification toolbar toggle"
           description="Shortcut to turn on/off flashlight"
           value={settings.notificationToolbarToggle}
-          onValueChange={() => setSetting('notificationToolbarToggle', !settings.notificationToolbarToggle)}
+          onValueChange={handleNotificationToolbarToggle}
+          testID="setting-notification-toolbar-switch"
         />
 
         <SettingsRow

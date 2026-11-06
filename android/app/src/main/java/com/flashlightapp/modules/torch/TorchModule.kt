@@ -66,6 +66,9 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     registerTorchCallback()
     registerScreenOffReceiver()
     loadFlashlightStayOnSetting()
+    if (com.flashlightapp.modules.notification.NotificationHelper.isToolbarEnabled(reactContext)) {
+      com.flashlightapp.modules.notification.NotificationHelper.updateNotification(reactContext, isTorchOn)
+    }
   }
 
   private fun registerTorchCallback() {
@@ -80,6 +83,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
           if (cameraId == targetCameraId) {
             isTorchOn = enabled
+            com.flashlightapp.modules.notification.NotificationHelper.setHardwareTorchState(reactContext, enabled)
             reactContext
               .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
               .emit("torchStateChanged", enabled)
@@ -245,6 +249,8 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
         try {
           val jsonObject = JSONObject(value)
           flashlightStayOn = jsonObject.optBoolean("flashlightStayOn", false)
+          val toolbarEnabled = jsonObject.optBoolean("notificationToolbarToggle", false)
+          com.flashlightapp.modules.notification.NotificationHelper.setToolbarEnabled(reactContext, toolbarEnabled)
         } catch (_: Exception) {}
       }
       promise.resolve(true)

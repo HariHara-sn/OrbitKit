@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notif_expanded_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/transparent"
+    android:paddingStart="4dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="6dp">
+
+    <!-- Title Row: "Flashlight is ON" + Glowing Dot -->
+    <LinearLayout
+        android:id="@+id/title_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_expanded_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Flashlight is ON"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:singleLine="true" />
+
+        <ImageView
+            android:id="@+id/dot_status_indicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="6dp"
+            android:src="@drawable/ic_dot_glowing_yellow" />
+    </LinearLayout>
+
+    <!-- Subtitle: "Tap to turn off the flashlight" -->
+    <TextView
+        android:id="@+id/tv_expanded_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="Tap to turn off the flashlight"
+        android:textColor="#9CA3AF"
+        android:textSize="13sp"
+        android:singleLine="true" />
+
+    <!-- Action Buttons Row at the bottom -->
+    <LinearLayout
+        android:id="@+id/actions_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <!-- Primary Action Button: Turn Off / Turn On -->
+        <LinearLayout
+            android:id="@+id/btn_expanded_action"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/bg_notif_btn_primary_on">
+
+            <ImageView
+                android:id="@+id/ic_expanded_action"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_notif_power" />
+
+            <TextView
+                android:id="@+id/tv_expanded_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="Turn Off"
+                android:textColor="#000000"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Secondary Action Button: Settings -->
+        <LinearLayout
+            android:id="@+id/btn_expanded_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/bg_notif_btn_secondary">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_notif_settings" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="Settings"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

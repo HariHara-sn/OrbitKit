@@ -137,7 +137,7 @@ export const ExitAppModal: React.FC<ExitAppModalProps> = ({
             Leave the App?
           </Text>
           <Text allowFontScaling={false} style={styles.description}>
-            Do you want to leave the app? You can turn off the flashlight anytime from here.
+            Do you want to leave the app? Explore our other features before leave
           </Text>
 
           {/* Action Buttons */}
