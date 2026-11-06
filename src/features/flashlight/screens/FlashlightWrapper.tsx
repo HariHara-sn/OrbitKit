@@ -125,10 +125,10 @@ export const FlashlightScreen = () => {
       <View style={styles.content} {...panResponder.panHandlers}>
         {mode === 'torch' && (
           <>
-            <Text style={styles.status}>
+            <Text testID="torch-status-text" style={styles.status}>
               {isOn ? 'Torch is ON' : 'Tap to turn on'}
             </Text>
-            <TorchButton isOn={isOn} onPress={handleToggle} />
+            <TorchButton testID="torch-toggle-button" isOn={isOn} onPress={handleToggle} />
           </>
         )}
 

@@ -36,6 +36,7 @@ export const BottomNav = ({ mode, onModeChange }: BottomNavProps) => {
         return (
           <Pressable
             key={item}
+            testID={`tab-${item}`}
             onPress={() => handleTabPress(item)}
             style={[styles.tab, active && styles.tabActive]}
             accessibilityRole="button"

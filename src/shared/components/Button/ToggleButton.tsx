@@ -10,6 +10,7 @@ export interface ToggleButtonProps {
   buttonStyle?: StyleProp<ViewStyle>;
   iconStyle?: StyleProp<TextStyle>;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
 export const ToggleButton = ({
@@ -19,9 +20,11 @@ export const ToggleButton = ({
   buttonStyle,
   iconStyle,
   accessibilityLabel,
+  testID,
 }: ToggleButtonProps) => (
   <View style={styles.wrapper}>
     <Pressable
+      testID={testID}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
