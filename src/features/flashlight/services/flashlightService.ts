@@ -1,7 +1,11 @@
-import { NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 export interface TorchNativeModule {
   setTorchMode(enabled: boolean): Promise<void>;
+  scheduleAutoOff?(seconds: number): Promise<void>;
+  cancelAutoOff?(): void;
+  addListener?(eventName: string): void;
+  removeListeners?(count: number): void;
 }
 
 export interface BrightnessNativeModule {
@@ -10,6 +14,17 @@ export interface BrightnessNativeModule {
 }
 
 const { TorchModule, BrightnessModule } = NativeModules;
+
+let torchEmitter: NativeEventEmitter | null = null;
+const getTorchEmitter = (): NativeEventEmitter | null => {
+  if (Platform.OS !== 'android' || !TorchModule) {
+    return null;
+  }
+  if (!torchEmitter) {
+    torchEmitter = new NativeEventEmitter(TorchModule);
+  }
+  return torchEmitter;
+};
 
 /**
  * Typed wrapper around the native torch + brightness modules.
@@ -26,6 +41,34 @@ export const flashlightService = {
     } catch {
       return false;
     }
+  },
+
+  scheduleAutoOff: async (seconds: number): Promise<boolean> => {
+    try {
+      if (!TorchModule?.scheduleAutoOff) {
+        return false;
+      }
+      await TorchModule.scheduleAutoOff(seconds);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  cancelAutoOff: (): void => {
+    if (!TorchModule?.cancelAutoOff) {
+      return;
+    }
+    TorchModule.cancelAutoOff();
+  },
+
+  onAutoOff: (callback: () => void): (() => void) => {
+    const emitter = getTorchEmitter();
+    if (!emitter) {
+      return () => {};
+    }
+    const sub = emitter.addListener('torchAutoOff', callback);
+    return () => sub.remove();
   },
 
   setBrightness: (brightness: number): void => {

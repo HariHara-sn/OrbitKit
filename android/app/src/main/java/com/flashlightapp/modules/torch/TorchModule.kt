@@ -4,15 +4,31 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class TorchModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule() {
 
   override fun getName(): String = "TorchModule"
+
+  private val mainHandler = Handler(Looper.getMainLooper())
+  private var autoOffRunnable: Runnable? = null
+  private var wakeLock: PowerManager.WakeLock? = null
+
+  private fun getCameraId(cameraManager: CameraManager): String {
+    return cameraManager.cameraIdList.firstOrNull { id ->
+      cameraManager
+        .getCameraCharacteristics(id)
+        .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+    } ?: throw IllegalStateException("No camera with flash available")
+  }
 
   @ReactMethod
   fun setTorchMode(enabled: Boolean, promise: Promise) {
@@ -24,18 +40,100 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     try {
       val cameraManager =
         reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-      val cameraId =
-        cameraManager.cameraIdList.firstOrNull { id ->
-          cameraManager
-            .getCameraCharacteristics(id)
-            .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-        }
-          ?: throw IllegalStateException("No camera with flash available")
+      val cameraId = getCameraId(cameraManager)
 
       cameraManager.setTorchMode(cameraId, enabled)
+
+      if (!enabled) {
+        cancelAutoOffInternal()
+      }
+
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("TORCH_ERROR", e.message ?: "Failed to set torch mode", e)
     }
+  }
+
+  @ReactMethod
+  fun scheduleAutoOff(seconds: Double, promise: Promise) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      promise.reject("TORCH_UNSUPPORTED", "Torch is not supported on this device")
+      return
+    }
+
+    cancelAutoOffInternal()
+
+    if (seconds <= 0) {
+      promise.resolve(null)
+      return
+    }
+
+    val millis = (seconds * 1000).toLong()
+
+    try {
+      val powerManager = reactContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+      wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FlashlightApp:AutoOffWakeLock").apply {
+        setReferenceCounted(false)
+        acquire(millis + 2000)
+      }
+
+      autoOffRunnable = Runnable {
+        try {
+          val cameraManager =
+            reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+          val cameraId = getCameraId(cameraManager)
+          cameraManager.setTorchMode(cameraId, false)
+
+          reactContext
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+            .emit("torchAutoOff", null)
+        } catch (_: Exception) {
+        } finally {
+          releaseWakeLock()
+        }
+      }
+
+      mainHandler.postDelayed(autoOffRunnable!!, millis)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject("SCHEDULE_ERROR", e.message ?: "Failed to schedule auto off", e)
+    }
+  }
+
+  @ReactMethod
+  fun cancelAutoOff() {
+    cancelAutoOffInternal()
+  }
+
+  private fun cancelAutoOffInternal() {
+    autoOffRunnable?.let {
+      mainHandler.removeCallbacks(it)
+      autoOffRunnable = null
+    }
+    releaseWakeLock()
+  }
+
+  private fun releaseWakeLock() {
+    try {
+      if (wakeLock?.isHeld == true) {
+        wakeLock?.release()
+      }
+    } catch (_: Exception) {}
+    wakeLock = null
+  }
+
+  @ReactMethod
+  fun addListener(eventName: String) {
+    // Required for NativeEventEmitter
+  }
+
+  @ReactMethod
+  fun removeListeners(count: Int) {
+    // Required for NativeEventEmitter
+  }
+
+  override fun invalidate() {
+    super.invalidate()
+    cancelAutoOffInternal()
   }
 }

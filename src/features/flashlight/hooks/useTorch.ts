@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import {
   AUTO_OFF_TIMER_NEVER,
   BATTERY_CUTOFF,
@@ -31,6 +32,7 @@ export const useTorch = (options?: UseTorchOptions) => {
   const [strobeSpeed, setStrobeSpeed] = useState(STROBE_DEFAULT_INTERVAL);
   const [isDimmed, setIsDimmed] = useState(false);
   const autoOffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const turnOnTimeRef = useRef<number | null>(null);
 
   // Unified battery hook: monitors level, charging state, event broadcasts and periodic polls
   const battery = useBattery(options?.powerControl ?? false);
@@ -44,10 +46,12 @@ export const useTorch = (options?: UseTorchOptions) => {
 
   const turnOff = useCallback(() => {
     clearAutoOffTimer();
+    flashlightService.cancelAutoOff();
     flashlightService.setTorchMode(false);
     flashlightService.resetBrightness();
     setIsOn(false);
     setIsDimmed(false);
+    turnOnTimeRef.current = null;
   }, [clearAutoOffTimer]);
 
   const turnOn = useCallback(async () => {
@@ -82,6 +86,7 @@ export const useTorch = (options?: UseTorchOptions) => {
     } else {
       return;
     }
+    turnOnTimeRef.current = Date.now();
     setIsOn(true);
   }, [mode, options?.powerControl, battery]);
 
@@ -105,29 +110,58 @@ export const useTorch = (options?: UseTorchOptions) => {
     };
   }, [isOn, mode, strobeSpeed]);
 
-  // Automatic timer shut-off
+  // Automatic timer shut-off (runs natively in background + foreground JS fallback)
   useEffect(() => {
     if (
       !isOn ||
       !options?.automaticOff ||
       options.automaticOffTimer === AUTO_OFF_TIMER_NEVER
     ) {
+      clearAutoOffTimer();
+      flashlightService.cancelAutoOff();
       return;
     }
 
     clearAutoOffTimer();
+
+    // Schedule native background timer that executes via Android Handler/WakeLock
+    // even when the app is in the background or device is locked
+    flashlightService.scheduleAutoOff(options.automaticOffTimer);
+
+    // Foreground JS fallback timer
     autoOffTimerRef.current = setTimeout(() => {
-      flashlightService.setTorchMode(false);
-      flashlightService.resetBrightness();
-      setIsOn(false);
-      setIsDimmed(false);
-      autoOffTimerRef.current = null;
+      turnOff();
     }, options.automaticOffTimer * 1000);
 
     return () => {
       clearAutoOffTimer();
     };
-  }, [isOn, options?.automaticOff, options.automaticOffTimer, clearAutoOffTimer]);
+  }, [isOn, options?.automaticOff, options?.automaticOffTimer, clearAutoOffTimer, turnOff]);
+
+  // Listen for native background auto-off completion
+  useEffect(() => {
+    const unsub = flashlightService.onAutoOff(() => {
+      turnOff();
+    });
+    return unsub;
+  }, [turnOff]);
+
+  // Catch up on auto-off expiration when app is foregrounded from background
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active' && isOn) {
+        if (
+          options?.automaticOff &&
+          options.automaticOffTimer !== AUTO_OFF_TIMER_NEVER &&
+          turnOnTimeRef.current &&
+          Date.now() - turnOnTimeRef.current >= options.automaticOffTimer * 1000
+        ) {
+          turnOff();
+        }
+      }
+    });
+    return () => sub.remove();
+  }, [isOn, options?.automaticOff, options?.automaticOffTimer, turnOff]);
 
   // Power Control rules:
   // - Cutoff at 3%
@@ -179,7 +213,8 @@ export const useTorch = (options?: UseTorchOptions) => {
     [mode, turnOff],
   );
 
-  const lowBatteryWarning = Boolean(options?.powerControl && !battery.isCharging && battery.level <= BATTERY_WARN);
+  const lowBatteryWarning =
+    Boolean(options?.powerControl && !battery.isCharging && battery.level <= BATTERY_WARN);
 
   const isCutoff =
     Boolean(options?.powerControl && !battery.isCharging && battery.level <= BATTERY_CUTOFF);
