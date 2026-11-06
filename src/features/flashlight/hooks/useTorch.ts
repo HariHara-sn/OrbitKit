@@ -25,6 +25,7 @@ export interface UseTorchOptions {
   automaticOffTimer: number;
   powerControl: boolean;
   automaticOn?: boolean;
+  flashlightStayOn?: boolean;
 }
 
 export const useTorch = (options?: UseTorchOptions) => {
@@ -102,6 +103,11 @@ export const useTorch = (options?: UseTorchOptions) => {
       turnOn();
     }
   }, [options?.automaticOn, turnOn]);
+
+  // Synchronize flashlightStayOn option with native module
+  useEffect(() => {
+    flashlightService.setFlashlightStayOn(options?.flashlightStayOn ?? false);
+  }, [options?.flashlightStayOn]);
 
   // Strobe effect
   useEffect(() => {

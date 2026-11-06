@@ -80,6 +80,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           description="Stay on after locking the screen"
           value={settings.flashlightStayOn}
           onValueChange={() => setSetting('flashlightStayOn', !settings.flashlightStayOn)}
+          testID="setting-flashlight-stay-on-switch"
         />
 
         <SettingsRow

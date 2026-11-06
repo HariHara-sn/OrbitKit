@@ -46,4 +46,4 @@
 `TEST` : adb shell dumpsys battery set level 8
 
 5. Automatic on — on startup useTorch automatically invokes turnOn() if enabled, persisted via Android SharedPreferences   [COMPLETED✅]
-
+6. Flashlight stay on — native screenOffReceiver monitors ACTION_SCREEN_OFF; if disabled, shuts off torch when screen locks [COMPLETED✅]

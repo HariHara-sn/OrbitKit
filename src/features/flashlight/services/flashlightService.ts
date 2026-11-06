@@ -4,6 +4,7 @@ export interface TorchNativeModule {
   setTorchMode(enabled: boolean): Promise<void>;
   scheduleAutoOff?(seconds: number): Promise<void>;
   cancelAutoOff?(): void;
+  setFlashlightStayOn?(stayOn: boolean): void;
   addListener?(eventName: string): void;
   removeListeners?(count: number): void;
 }
@@ -60,6 +61,13 @@ export const flashlightService = {
       return;
     }
     TorchModule.cancelAutoOff();
+  },
+
+  setFlashlightStayOn: (stayOn: boolean): void => {
+    if (!TorchModule?.setFlashlightStayOn) {
+      return;
+    }
+    TorchModule.setFlashlightStayOn(stayOn);
   },
 
   onAutoOff: (callback: () => void): (() => void) => {

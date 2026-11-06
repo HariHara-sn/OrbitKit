@@ -1,6 +1,9 @@
 package com.flashlightapp.modules.torch
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
@@ -12,6 +15,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import org.json.JSONObject
 
 class TorchModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule() {
@@ -24,6 +28,10 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
   private var torchCallback: CameraManager.TorchCallback? = null
   private var callbackRegistered = false
 
+  private var isTorchOn = false
+  private var flashlightStayOn = false
+  private var screenOffReceiverRegistered = false
+
   private fun getCameraId(cameraManager: CameraManager): String {
     return cameraManager.cameraIdList.firstOrNull { id ->
       cameraManager
@@ -32,9 +40,32 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     } ?: throw IllegalStateException("No camera with flash available")
   }
 
+  // Receiver for screen off (lock screen): turns off torch if flashlightStayOn is false
+  private val screenOffReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+      if (intent.action == Intent.ACTION_SCREEN_OFF) {
+        if (!flashlightStayOn && isTorchOn) {
+          try {
+            val cameraManager =
+              reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val cameraId = getCameraId(cameraManager)
+            cameraManager.setTorchMode(cameraId, false)
+            isTorchOn = false
+
+            reactContext
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit("torchStateChanged", false)
+          } catch (_: Exception) {}
+        }
+      }
+    }
+  }
+
   override fun initialize() {
     super.initialize()
     registerTorchCallback()
+    registerScreenOffReceiver()
+    loadFlashlightStayOnSetting()
   }
 
   private fun registerTorchCallback() {
@@ -48,6 +79,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
       torchCallback = object : CameraManager.TorchCallback() {
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
           if (cameraId == targetCameraId) {
+            isTorchOn = enabled
             reactContext
               .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
               .emit("torchStateChanged", enabled)
@@ -56,6 +88,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
 
         override fun onTorchModeUnavailable(cameraId: String) {
           if (cameraId == targetCameraId) {
+            isTorchOn = false
             reactContext
               .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
               .emit("torchStateChanged", false)
@@ -80,6 +113,41 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  private fun registerScreenOffReceiver() {
+    if (!screenOffReceiverRegistered) {
+      try {
+        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        reactContext.registerReceiver(screenOffReceiver, filter)
+        screenOffReceiverRegistered = true
+      } catch (_: Exception) {}
+    }
+  }
+
+  private fun unregisterScreenOffReceiver() {
+    if (screenOffReceiverRegistered) {
+      try {
+        reactContext.unregisterReceiver(screenOffReceiver)
+      } catch (_: Exception) {}
+      screenOffReceiverRegistered = false
+    }
+  }
+
+  private fun loadFlashlightStayOnSetting() {
+    try {
+      val prefs = reactContext.getSharedPreferences("flashlight_settings", Context.MODE_PRIVATE)
+      val json = prefs.getString("app_settings", null)
+      if (json != null) {
+        val jsonObject = JSONObject(json)
+        flashlightStayOn = jsonObject.optBoolean("flashlightStayOn", false)
+      }
+    } catch (_: Exception) {}
+  }
+
+  @ReactMethod
+  fun setFlashlightStayOn(stayOn: Boolean) {
+    flashlightStayOn = stayOn
+  }
+
   @ReactMethod
   fun setTorchMode(enabled: Boolean, promise: Promise) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -93,6 +161,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
       val cameraId = getCameraId(cameraManager)
 
       cameraManager.setTorchMode(cameraId, enabled)
+      isTorchOn = enabled
 
       if (!enabled) {
         cancelAutoOffInternal()
@@ -133,6 +202,7 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
             reactContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
           val cameraId = getCameraId(cameraManager)
           cameraManager.setTorchMode(cameraId, false)
+          isTorchOn = false
 
           reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
@@ -171,6 +241,12 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     try {
       val prefs = reactContext.getSharedPreferences("flashlight_settings", Context.MODE_PRIVATE)
       prefs.edit().putString(key, value).apply()
+      if (key == "app_settings") {
+        try {
+          val jsonObject = JSONObject(value)
+          flashlightStayOn = jsonObject.optBoolean("flashlightStayOn", false)
+        } catch (_: Exception) {}
+      }
       promise.resolve(true)
     } catch (_: Exception) {
       promise.resolve(false)
@@ -208,5 +284,6 @@ class TorchModule(private val reactContext: ReactApplicationContext) :
     super.invalidate()
     cancelAutoOffInternal()
     unregisterTorchCallback()
+    unregisterScreenOffReceiver()
   }
 }
