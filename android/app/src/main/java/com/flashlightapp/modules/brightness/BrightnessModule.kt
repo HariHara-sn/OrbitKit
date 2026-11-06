@@ -13,13 +13,13 @@ class BrightnessModule(private val reactContext: ReactApplicationContext) :
   private fun currentActivity() = reactContext.currentActivity
 
   @ReactMethod
-  fun setBrightness(brightness: Float) {
+  fun setBrightness(brightness: Double) {
     val activity = currentActivity() ?: return
     activity.runOnUiThread {
       val window = activity.window
       window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
       val params = window.attributes
-      params.screenBrightness = brightness.coerceIn(0f, 1f)
+      params.screenBrightness = brightness.toFloat().coerceIn(0.01f, 1f)
       window.attributes = params
     }
   }

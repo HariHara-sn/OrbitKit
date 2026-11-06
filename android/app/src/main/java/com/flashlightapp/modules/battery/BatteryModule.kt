@@ -33,12 +33,31 @@ class BatteryModule(private val reactContext: ReactApplicationContext) :
 
   private var receiverRegistered = false
 
+  override fun initialize() {
+    super.initialize()
+    register()
+  }
+
+  override fun invalidate() {
+    super.invalidate()
+    unregister()
+  }
+
   @ReactMethod
   fun getBatteryLevel(promise: Promise) {
     try {
-      val bm = reactContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-      val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toDouble() / 100.0
-      val isCharging = isCurrentlyCharging()
+      val intent = reactContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+      val level = if (intent != null) {
+        getBatteryLevel(intent)
+      } else {
+        val bm = reactContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toDouble() / 100.0
+      }
+      val isCharging = if (intent != null) {
+        getChargingState(intent)
+      } else {
+        isCurrentlyCharging()
+      }
       val result = WritableNativeMap().apply {
         putDouble("level", level)
         putBoolean("isCharging", isCharging)
@@ -51,7 +70,7 @@ class BatteryModule(private val reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun addListener(eventName: String) {
-    // Required for NativeEventEmitter
+    register()
   }
 
   @ReactMethod
@@ -76,7 +95,9 @@ class BatteryModule(private val reactContext: ReactApplicationContext) :
 
   private fun getChargingState(intent: Intent): Boolean {
     val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-    return status == BatteryManager.BATTERY_STATUS_CHARGING ||
+    val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+    return plugged != 0 ||
+      status == BatteryManager.BATTERY_STATUS_CHARGING ||
       status == BatteryManager.BATTERY_STATUS_FULL
   }
 

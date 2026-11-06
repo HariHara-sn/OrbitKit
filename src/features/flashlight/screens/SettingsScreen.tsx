@@ -44,6 +44,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable
+          testID="settings-back-button"
           onPress={handleBack}
           style={styles.backButton}
           accessibilityRole="button"
@@ -56,6 +57,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
       </View>
 
       <ScrollView
+        testID="settings-scroll"
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
@@ -125,17 +127,22 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           description="Low battery warning below 10%"
           value={settings.powerControl}
           onValueChange={() => setSetting('powerControl', !settings.powerControl)}
+          testID="setting-power-control-switch"
           extra={
             settings.powerControl && (
-              <View style={styles.powerControlDoc}>
+              <View testID="power-control-doc" style={styles.powerControlDoc}>
                 <Text allowFontScaling={false} style={styles.powerControlDocTitle}>
                   📋 How Power Control works
                 </Text>
-                <Text allowFontScaling={false} style={styles.powerControlDocBody}>
+                <Text
+                  allowFontScaling={false}
+                  style={styles.powerControlDocBody}
+                  testID="power-control-doc-body"
+                >
                   {'• Monitors battery level in the background.\n' +
                     '• Shows a warning banner when battery drops below 10%.\n' +
                     '• Automatically dims the torch at 5% to preserve charge.\n' +
-                    '• Turns the flashlight off at 2% to protect the battery.'}
+                    '• Turns the flashlight off at 3% to protect the battery.'}
                 </Text>
               </View>
             )

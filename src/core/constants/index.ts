@@ -21,6 +21,11 @@ export const MODE_LABELS: Record<FlashlightMode, string> = {
 };
 
 export const MAX_BRIGHTNESS = 1;
+export const DIM_BRIGHTNESS = 0.5;
+
+export const BATTERY_WARN = 0.10; // battery 10% for warning banner
+export const BATTERY_DIM = 0.05;  // battery 5% for auto-dimming
+export const BATTERY_CUTOFF = 0.03;
 
 export const STROBE_MIN_INTERVAL = 60;
 export const STROBE_MAX_INTERVAL = 1000;

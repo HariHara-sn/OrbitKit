@@ -1,32 +1,39 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AUTO_OFF_TIMER_NEVER,
+  BATTERY_CUTOFF,
+  BATTERY_DIM,
+  BATTERY_WARN,
+  DIM_BRIGHTNESS,
   MAX_BRIGHTNESS,
   STROBE_DEFAULT_INTERVAL,
 } from '../../../core/constants';
 import type { FlashlightMode } from '../../../core/constants';
 import { flashlightService } from '../services/flashlightService';
-import { batteryService, type BatteryInfo } from '../services/batteryService';
+import { useBattery } from './useBattery';
 
-interface UseTorchOptions {
+export {
+  BATTERY_CUTOFF,
+  BATTERY_DIM,
+  BATTERY_WARN,
+  DIM_BRIGHTNESS,
+};
+
+export interface UseTorchOptions {
   automaticOff: boolean;
   automaticOffTimer: number;
   powerControl: boolean;
 }
 
-const BATTERY_WARN = 0.10;
-const BATTERY_DIM = 0.05;
-const BATTERY_CUTOFF = 0.02;
-
-const DIM_BRIGHTNESS = 0.3;
-
 export const useTorch = (options?: UseTorchOptions) => {
   const [isOn, setIsOn] = useState(false);
   const [mode, setModeState] = useState<FlashlightMode>('torch');
   const [strobeSpeed, setStrobeSpeed] = useState(STROBE_DEFAULT_INTERVAL);
-  const [battery, setBattery] = useState<BatteryInfo>({ level: 1, isCharging: false });
+  const [isDimmed, setIsDimmed] = useState(false);
   const autoOffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dimmedRef = useRef(false);
+
+  // Unified battery hook: monitors level, charging state, event broadcasts and periodic polls
+  const battery = useBattery(options?.powerControl ?? false);
 
   const clearAutoOffTimer = useCallback(() => {
     if (autoOffTimerRef.current !== null) {
@@ -40,25 +47,45 @@ export const useTorch = (options?: UseTorchOptions) => {
     flashlightService.setTorchMode(false);
     flashlightService.resetBrightness();
     setIsOn(false);
-    dimmedRef.current = false;
+    setIsDimmed(false);
   }, [clearAutoOffTimer]);
 
   const turnOn = useCallback(async () => {
+    // Cutoff protection at 3% battery
+    if (
+      options?.powerControl &&
+      !battery.isCharging &&
+      battery.level <= BATTERY_CUTOFF
+    ) {
+      return;
+    }
+
+    const shouldDim =
+      options?.powerControl &&
+      !battery.isCharging &&
+      battery.level <= BATTERY_DIM;
+
     if (mode === 'torch' || mode === 'strobe') {
       if (mode === 'torch') {
         const success = await flashlightService.setTorchMode(true);
         if (!success) {
           return;
         }
+        if (shouldDim) {
+          flashlightService.setBrightness(DIM_BRIGHTNESS);
+          setIsDimmed(true);
+        }
       }
     } else if (mode === 'white') {
-      flashlightService.setBrightness(MAX_BRIGHTNESS);
+      flashlightService.setBrightness(shouldDim ? DIM_BRIGHTNESS : MAX_BRIGHTNESS);
+      setIsDimmed(shouldDim);
     } else {
       return;
     }
     setIsOn(true);
-  }, [mode]);
+  }, [mode, options?.powerControl, battery]);
 
+  // Strobe effect
   useEffect(() => {
     if (!isOn || mode !== 'strobe') {
       return;
@@ -78,6 +105,7 @@ export const useTorch = (options?: UseTorchOptions) => {
     };
   }, [isOn, mode, strobeSpeed]);
 
+  // Automatic timer shut-off
   useEffect(() => {
     if (
       !isOn ||
@@ -92,6 +120,7 @@ export const useTorch = (options?: UseTorchOptions) => {
       flashlightService.setTorchMode(false);
       flashlightService.resetBrightness();
       setIsOn(false);
+      setIsDimmed(false);
       autoOffTimerRef.current = null;
     }, options.automaticOffTimer * 1000);
 
@@ -100,20 +129,18 @@ export const useTorch = (options?: UseTorchOptions) => {
     };
   }, [isOn, options?.automaticOff, options.automaticOffTimer, clearAutoOffTimer]);
 
-  useEffect(() => {
-    if (!options?.powerControl) {
-      setBattery({ level: 1, isCharging: false });
-      return;
-    }
-
-    batteryService.getBatteryLevel().then(setBattery);
-
-    const unsub = batteryService.onBatteryLevelChanged(setBattery);
-    return unsub;
-  }, [options?.powerControl]);
-
+  // Power Control rules:
+  // - Cutoff at 3%
+  // - Dimming at 5%
+  // - Warning below 10%
   useEffect(() => {
     if (!options?.powerControl || battery.isCharging || !isOn) {
+      if (isDimmed) {
+        setIsDimmed(false);
+        if (isOn) {
+          flashlightService.resetBrightness();
+        }
+      }
       return;
     }
 
@@ -122,11 +149,16 @@ export const useTorch = (options?: UseTorchOptions) => {
       return;
     }
 
-    if (battery.level <= BATTERY_DIM && !dimmedRef.current) {
-      dimmedRef.current = true;
-      flashlightService.setBrightness(DIM_BRIGHTNESS);
+    if (battery.level <= BATTERY_DIM) {
+      if (!isDimmed) {
+        setIsDimmed(true);
+        flashlightService.setBrightness(DIM_BRIGHTNESS);
+      }
+    } else if (isDimmed) {
+      setIsDimmed(false);
+      flashlightService.resetBrightness();
     }
-  }, [options?.powerControl, battery, isOn, turnOff]);
+  }, [options?.powerControl, battery, isOn, isDimmed, turnOff]);
 
   const toggle = useCallback(async () => {
     if (isOn) {
@@ -147,8 +179,10 @@ export const useTorch = (options?: UseTorchOptions) => {
     [mode, turnOff],
   );
 
-  const lowBatteryWarning =
-    options?.powerControl && !battery.isCharging && battery.level <= BATTERY_WARN;
+  const lowBatteryWarning = Boolean(options?.powerControl && !battery.isCharging && battery.level <= BATTERY_WARN);
+
+  const isCutoff =
+    Boolean(options?.powerControl && !battery.isCharging && battery.level <= BATTERY_CUTOFF);
 
   return {
     isOn,
@@ -162,5 +196,7 @@ export const useTorch = (options?: UseTorchOptions) => {
     batteryLevel: battery.level,
     isCharging: battery.isCharging,
     lowBatteryWarning,
+    isDimmed,
+    isCutoff,
   };
 };

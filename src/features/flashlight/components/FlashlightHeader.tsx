@@ -20,6 +20,7 @@ export const FlashlightHeader = ({
     <View style={styles.settingsSlot}>
       <CustomTooltip content="Open settings" placement="bottom">
         <Pressable
+          testID="settings-header-button"
           onPress={onSettingsPress}
           style={styles.settingsIcon}
           accessibilityRole="button"

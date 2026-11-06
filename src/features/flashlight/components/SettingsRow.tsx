@@ -12,6 +12,7 @@ interface SettingsRowProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   extra?: React.ReactNode;
+  testID?: string;
 }
 
 export const SettingsRow = ({
@@ -21,6 +22,7 @@ export const SettingsRow = ({
   value,
   onValueChange,
   extra,
+  testID,
 }: SettingsRowProps) => {
   const { trigger: haptic } = useHaptic();
   const { playClick } = useSound();
@@ -35,7 +37,10 @@ export const SettingsRow = ({
   );
 
   return (
-    <View style={[styles.wrapper, value && styles.wrapperGlow]}>
+    <View
+      testID={testID ? `${testID}-row` : undefined}
+      style={[styles.wrapper, value && styles.wrapperGlow]}
+    >
       <View style={styles.row}>
         <View style={[styles.iconContainer, value && styles.iconGlow]}>
           <Icon
@@ -56,6 +61,7 @@ export const SettingsRow = ({
           </Text>
         </View>
         <Switch
+          testID={testID}
           value={value}
           onValueChange={handleChange}
           trackColor={{ false: colors.border, true: colors.primary50 }}

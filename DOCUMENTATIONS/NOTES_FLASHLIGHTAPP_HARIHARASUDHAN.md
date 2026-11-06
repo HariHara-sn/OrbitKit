@@ -33,4 +33,18 @@ visit https://ionic.io/ionicons?utm_source=chatgpt.com
 
 
 
+## Rebuild Commands Used for Native Kotlin Changes
+`must recompile and reinstall the native Android APK.`
+1. Rebuild the debug APK with Gradle
+cd android
+.\gradlew.bat assembleDebug
+cd ..
 
+2. Reinstall the newly compiled APK onto the phone
+`adb install -r android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk`
+
+3. Restore MIUI background start permissions (MIUI resets them on new APK installs)
+`adb shell "appops set com.flashlightapp 10021 allow; appops set com.flashlightapp SYSTEM_ALERT_WINDOW allow; appops set com.flashlightapp.test 10021 allow; appops set com.flashlightapp.test SYSTEM_ALERT_WINDOW allow"`
+
+4. Launch the updated app
+`adb shell am start -n com.flashlightapp/.MainActivity`

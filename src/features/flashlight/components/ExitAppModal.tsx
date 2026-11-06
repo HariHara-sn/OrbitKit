@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  AppState,
   BackHandler,
   Easing,
   Modal,
@@ -68,6 +69,18 @@ export const ExitAppModal: React.FC<ExitAppModalProps> = ({
     }
   }, [visible, fadeAnim, scaleAnim, modalRendered]);
 
+  // Clean up immediately if app is sent to background so modal never lingers on resume
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', nextState => {
+      if (nextState !== 'active') {
+        setModalRendered(false);
+        fadeAnim.setValue(0);
+        scaleAnim.setValue(0.85);
+      }
+    });
+    return () => sub.remove();
+  }, [fadeAnim, scaleAnim]);
+
   const handleCancel = () => {
     haptic();
     playClick();
@@ -77,6 +90,10 @@ export const ExitAppModal: React.FC<ExitAppModalProps> = ({
   const handleExit = () => {
     haptic();
     playClick();
+    // Immediately unmount so it never flashes when app is reopened
+    setModalRendered(false);
+    fadeAnim.setValue(0);
+    scaleAnim.setValue(0.85);
     if (onConfirmExit) {
       onConfirmExit();
     } else {
@@ -97,14 +114,8 @@ export const ExitAppModal: React.FC<ExitAppModalProps> = ({
       onRequestClose={handleCancel}
       accessibilityRole="alert">
       <View style={styles.rootOverlay}>
-        <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={handleCancel}
-            accessibilityRole="button"
-            accessibilityLabel="Close exit dialog"
-          />
-        </Animated.View>
+        {/* Backdrop: non-clickable so modal only closes via Stay button or Hardware Back button */}
+        <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} />
 
         <Animated.View
           style={[
@@ -173,7 +184,7 @@ const styles = StyleSheet.create({
   },
 
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(7, 15, 29, 0.78)',
   },
 

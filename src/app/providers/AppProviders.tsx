@@ -28,6 +28,8 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
       batteryLevel: torch.batteryLevel,
       isCharging: torch.isCharging,
       lowBatteryWarning: torch.lowBatteryWarning,
+      isDimmed: torch.isDimmed,
+      isCutoff: torch.isCutoff,
     }),
     [
       torch.isOn,
@@ -41,6 +43,8 @@ const TorchProvider = ({ children }: { children: ReactNode }) => {
       torch.batteryLevel,
       torch.isCharging,
       torch.lowBatteryWarning,
+      torch.isDimmed,
+      torch.isCutoff,
     ],
   );
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { AppState, BackHandler, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { BottomNav } from '../components/BottomNav';
@@ -14,12 +14,13 @@ import { MorseScreen } from './MorseScreen';
 import { StrobeScreen } from './StrobeScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ExitAppModal } from '../components/ExitAppModal';
+import { LowBatteryWarningBanner } from '../components/LowBatteryWarningBanner';
 import { flashlightService } from '../services/flashlightService';
 
 const SWIPE_THRESHOLD = 80;
 
 export const FlashlightScreen = () => {
-  const { isOn, mode, toggle, setMode, lowBatteryWarning, batteryLevel } = useTorchContext();
+  const { isOn, mode, toggle, setMode, lowBatteryWarning, batteryLevel, isCharging } = useTorchContext();
   const [showSettings, setShowSettings] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const { trigger: haptic } = useHaptic();
@@ -83,12 +84,24 @@ export const FlashlightScreen = () => {
     return () => sub.remove();
   }, [mode, haptic, setMode, showSettings, showExitModal]);
 
+  // Ensure exit modal is closed whenever app is backgrounded
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', nextState => {
+      if (nextState !== 'active') {
+        setShowExitModal(false);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   const handleConfirmExit = useCallback(() => {
     if (isOn) {
       flashlightService.setTorchMode(false);
     }
     setShowExitModal(false);
-    BackHandler.exitApp();
+    setTimeout(() => {
+      BackHandler.exitApp();
+    }, 25);
   }, [isOn]);
 
   const handleToggle = useCallback(() => {
@@ -114,14 +127,12 @@ export const FlashlightScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <FlashlightHeader onSettingsPress={handleSettingsPress} />
-      {lowBatteryWarning && (
-        <View style={styles.warningBanner}>
-          <Icon name={ICONS.batteryWarning} size={16} color={colors.yellow} />
-          <Text style={styles.warningText}>
-            Low battery ({Math.round(batteryLevel * 100)}%)
-          </Text>
-        </View>
-      )}
+      <LowBatteryWarningBanner
+        visible={Boolean(lowBatteryWarning)}
+        batteryLevel={batteryLevel}
+        isCharging={isCharging}
+        onOpenSettings={() => setShowSettings(true)}
+      />
       <View style={styles.content} {...panResponder.panHandlers}>
         {mode === 'torch' && (
           <>
@@ -172,21 +183,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textMuted,
     marginBottom: 24,
-  },
-
-  warningBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.yellow15,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-
-  warningText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.yellow,
   },
 });

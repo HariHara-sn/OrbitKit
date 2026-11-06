@@ -15,4 +15,6 @@ export interface FlashlightContextValue extends FlashlightState {
   batteryLevel: number;
   isCharging: boolean;
   lowBatteryWarning: boolean;
+  isDimmed?: boolean;
+  isCutoff?: boolean;
 }
